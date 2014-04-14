@@ -53,7 +53,7 @@ int create_Rect(t_object *t_obj) {
 int moving_Rect(t_object *t_obj) {
 	int move;
 	SDL_Event event;
-	//move = 1;
+	move = 1;
 
 	while (move) {
 		SDL_WaitEvent(&event);
@@ -89,7 +89,7 @@ int init(t_object *t_obj) {
 		return (1);
 	}
 	//Screen
-	if ((t_obj->screen = SDL_SetVideoMode(800, 600, 32, SDL_HWSURFACE)) == NULL) {
+	if ((t_obj->screen = SDL_SetVideoMode(1366, 768, 32, SDL_HWSURFACE)) == NULL) {
 		fprintf(stderr, "Error: %s", SDL_GetError());
 		return (1);
 	}
@@ -126,4 +126,3 @@ int main() {
 		return (1);
 	return (0);
 }
-

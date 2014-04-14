@@ -1,0 +1,46 @@
+Detta är en exempelkod för att visa hur strukturen ska vara i koden.
+Koden ska ske helt på engelska, svenska får inte förekomma.
+Klara variabelnamn som tydligt beskriver vad de gör.
+Tydliga funktionsnamn som beskriver vad funktionens syfte är.
+Kommentarer som ska ses av användare i .h filer och kommentarer för programmerare i .c filer.
+Alltid kommentera funktionsprototyper.
+Inga funktionsprototyper i .c filer.
+Inga globala variabler.
+
+
+Intendering på rätt sätt
+function(){
+	if (){
+		if (){
+			var = 0;
+		}
+	}
+}
+Variabelnamn ska vara små bokstäver med underscore mellan ord:
+this_is_a_variable;
+variable;
+
+Funktionsnamn ska vara små bokstäver med underscore mellan ord:
+this_is_a_function(){
+
+};
+
+foo(){
+
+
+};
+
+Använda bool variabel vid jämförelser som fördefinieras i en .h fil
+så det går att göra:
+
+while(isHit){
+
+}
+
+
+
+Ska alltid vara klamrar efter if även fast det bara är en rad
+if (TEST == 0){ 
+
+}
+
