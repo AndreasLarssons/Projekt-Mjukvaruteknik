@@ -4,7 +4,7 @@ int main( int argc, char* args[] )
 {
     //Start SDL
     SDL_Init( SDL_INIT_EVERYTHING );
-    printf("HEJ");
+    printf("DÅÅÅ");
     //Quit SDL
     SDL_Quit();
 
