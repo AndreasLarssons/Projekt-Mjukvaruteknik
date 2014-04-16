@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <time.h>
+#include <stdlib.h>
 #include "draw.h"
 #define TRUE 1
 #define FALSE 0
@@ -15,6 +17,7 @@
 typedef int bool;
 
 int main(int argc, char **arg) {
+	srand(time(NULL));
 	SDL_Surface *screen;
 	SDL_Event event;
 	bool is_running = TRUE;
@@ -25,7 +28,17 @@ int main(int argc, char **arg) {
 	int x = 1366 / 2 - 50;
 	int y = 768 / 2 - 50;
 	SDL_Rect player = create_rect(x,y,100,100);
-	SDL_Rect rectangles[10];
+	//SDL_Rect rectangles[10];
+
+	SDL_Rect *rectangles;
+	rectangles = (SDL_Rect *)malloc(sizeof(SDL_Rect));
+	int numbOfRect = 0;
+	//*rectangles = create_rect(x+50, y+50, 100, 100);
+	for(; numbOfRect < 100; numbOfRect++){
+		rectangles = (SDL_Rect *)realloc(rectangles, (numbOfRect+1)*sizeof(SDL_Rect));
+		*(rectangles + numbOfRect) = create_rect(rand()%WIDTH+1, rand()%HEIGHT+1, 100, 100);
+	}
+
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
 		return 0;
 	}
@@ -59,6 +72,12 @@ int main(int argc, char **arg) {
 		}
 		draw_screen(screen);
 		draw_rect(screen, &player);
+		//draw_rect(screen, rectangles);
+		//draw_rect(screen, rectangles+1);
+		int i;
+		for(i = 0; i < numbOfRect; i++){
+			draw_rect(screen, rectangles+i);
+		}
 
 		SDL_BlitSurface(screen, NULL, screen, NULL);
 		SDL_Flip(screen);
