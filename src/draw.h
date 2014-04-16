@@ -13,6 +13,7 @@
 
 extern void draw_screen();
 extern SDL_Rect draw_rect();
+extern SDL_Rect create_rect();
 
 
 

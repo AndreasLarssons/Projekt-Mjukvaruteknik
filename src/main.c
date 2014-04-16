@@ -24,7 +24,8 @@ int main(int argc, char **arg) {
 	Uint32 lastUpdateTime = SDL_GetTicks();
 	int x = 1366 / 2 - 50;
 	int y = 768 / 2 - 50;
-
+	SDL_Rect player = create_rect(x,y,100,100);
+	SDL_Rect rectangles[10];
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
 		return 0;
 	}
@@ -35,7 +36,6 @@ int main(int argc, char **arg) {
 	while (is_running) {
 
 		Uint32 current_time = SDL_GetTicks();
-
 		Uint32 difference = current_time - lastUpdateTime;
 		SDL_FreeSurface(screen);
 		while (difference >= FPS) {
@@ -43,22 +43,23 @@ int main(int argc, char **arg) {
 			difference -= FPS;
 
 			if (keystates[SDLK_UP]) {
-				y -= 3;
+				player.y -= 3;
 			}
 			if (keystates[SDLK_DOWN]) {
-				y += 3;
+				player.y += 3;
 			}
 			if (keystates[SDLK_RIGHT]) {
-				x += 3;
+				player.x += 3;
 			}
 			if (keystates[SDLK_LEFT]) {
-				x -= 3;
+				player.x -= 3;
 			}
 			lastUpdateTime = current_time;
 
 		}
 		draw_screen(screen);
-		draw_rect(screen, x, y, 100, 100);
+		draw_rect(screen, &player);
+
 		SDL_BlitSurface(screen, NULL, screen, NULL);
 		SDL_Flip(screen);
 		while (SDL_PollEvent(&event)) {

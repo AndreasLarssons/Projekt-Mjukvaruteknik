@@ -8,9 +8,12 @@ void draw_screen(SDL_Surface *screen) {
 
 }
 
-SDL_Rect draw_rect(SDL_Surface *screen, int x, int y, int width, int height) {
+SDL_Rect draw_rect(SDL_Surface *screen, SDL_Rect *rect) {
 
-	SDL_Rect rect = { x, y, width, height };
-	SDL_FillRect(screen, &rect, SDL_MapRGB(screen->format, 0, 125, 125));
+	SDL_FillRect(screen, rect, SDL_MapRGB(screen->format, 0, 125, 125));
+	return *rect;
+}
+SDL_Rect create_rect(int x, int y , int width, int height){
+	SDL_Rect rect = {x,y,width,height};
 	return rect;
 }
