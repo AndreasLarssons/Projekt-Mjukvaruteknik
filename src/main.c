@@ -7,7 +7,9 @@
 #include <errno.h>
 #include <time.h>
 #include <stdlib.h>
+#include <SDL/SDL_thread.h>
 #include "draw.h"
+#include "network.h"
 #define TRUE 1
 #define FALSE 0
 #define WIDTH 1366
@@ -67,9 +69,9 @@ int main(int argc, char **arg) {
 	SDL_Rect player = create_rect(x, y, 100, 100);
 	//SDL_Rect rectangles[10];
 
-	SDL_Rect *rectangles;
-	rectangles = (SDL_Rect *) malloc(sizeof(SDL_Rect));
-	int numbOfRect = 0;
+	//SDL_Rect *rectangles;
+	//rectangles = (SDL_Rect *) malloc(sizeof(SDL_Rect));
+//	int numbOfRect = 0;
 	//*rectangles = create_rect(x+50, y+50, 100, 100);
 //	for (; numbOfRect < 100; numbOfRect++) {
 //		rectangles = (SDL_Rect *) realloc(rectangles,
@@ -85,8 +87,17 @@ int main(int argc, char **arg) {
 		SDL_Quit();
 		return 1;
 	}
-	while (is_running) {
 
+	SDL_Thread *net_thread_recv = NULL;
+
+	net_thread_recv = SDL_CreateThread(network_recv, NULL);
+	if(net_thread_recv == NULL){
+		printf("\nSDL_CreateThread failed: %s\n", SDL_GetError());
+		return -1;
+	}
+
+
+	while (is_running) {
 		Uint32 current_time = SDL_GetTicks();
 		Uint32 difference = current_time - lastUpdateTime;
 		SDL_FreeSurface(screen);
@@ -97,7 +108,7 @@ int main(int argc, char **arg) {
 		}
 		draw(screen, &player);
 		close_window(&is_running);
-		int i;
+//		int i;
 //		for (i = 0; i < numbOfRect; i++) {
 //			draw_rect(screen, rectangles + i);
 //		}
