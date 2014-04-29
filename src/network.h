@@ -10,7 +10,12 @@
 
 #include <SDL/SDL_net.h>
 
+typedef struct thread_data{
+	TCPsocket tcpsock;
+	int thread_id;
+}thread_data;
 
 extern int network_recv();
+extern void cord_trans();
 
 #endif /* NETWORK_H_ */
