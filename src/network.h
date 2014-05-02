@@ -12,12 +12,12 @@
 
 typedef struct thread_data{
 	TCPsocket tcpsock;
-	int thread_id;
-	SDL_Rect other_player;
+	int id, x, y, ready;
 }thread_data;
 
 extern int network_recv();
 extern void cord_trans();
+extern int network_trans();
 extern SDL_Rect players[4];
 
 #endif /* NETWORK_H_ */

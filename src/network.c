@@ -33,14 +33,20 @@ int network_recv(void *data){
 	}
 
 	SDLNet_TCP_Recv(thread_info->tcpsock, msg, MAX_LENGTH);
-	int i, counter = 0;
-	for(i = 0; i < 5; i++){
-		if(msg[i] == '#'){
-			counter++;
-		}
+//	int i, counter = 0;
+//	for(i = 0; i < 5; i++){
+//		if(msg[i] == '#'){
+//			counter++;
+//		}
+//	}
+
+	while(sscanf(msg, "#|%d|#", &thread_info->id) != 1){
+		SDLNet_TCP_Recv(thread_info->tcpsock, msg, MAX_LENGTH);
 	}
-	sscanf(msg, "#|%d|#", &thread_info->thread_id);
-	printf("\n%d\n", thread_info->thread_id);
+	printf("\n%d\n", thread_info->id);
+	//players[thread_info->id].x = 1366 / 2 - 50;
+	//players[thread_info->id].y = 768 / 2 - 50;
+	thread_info->ready = 1;
 
 	// Tries to receive a message to the server, if successful it prints the message and sends back a message.
 	while(1){
@@ -50,27 +56,30 @@ int network_recv(void *data){
 		else{
 			// Data has been received.
 			sscanf(msg, "#%d|%d|%d#", &id, &x, &y);
-			thread_info->other_player.x = x;
-			thread_info->other_player.y = y;
-
-			printf("\nx:%d y:%d\n", thread_info->other_player.x, thread_info->other_player.y);
-			//SDLNet_TCP_Send(*tcpsock, trollmsg, 12);
+			if(id != thread_info->id){
+				players[id].x = x;
+				players[id].y = y;
+				printf("\nid:%d x:%d y:%d\n", id, x, y);
+			}
 		}
-
 	}
 
 	return 0;
 }
 
 int network_trans(void *data){
-
+	thread_data *thread_info = (thread_data *)data;
+	while(1){
+		SDL_Delay(100);
+		cord_trans(thread_info->x, thread_info->y, thread_info);
+	}
 	return 0;
 }
 
 // # is the start and end character of the message.
 void cord_trans(int x, int y, thread_data *thread_recv_info){
 	char str[20];
-	sprintf(str, "#%d|%d|%d#",thread_recv_info->thread_id, x, y);
+	sprintf(str, "#%d|%d|%d#",thread_recv_info->id, players[thread_recv_info->id].x, players[thread_recv_info->id].y);
 	SDLNet_TCP_Send(thread_recv_info->tcpsock, str, 20);
 	//printf("\n%s\n", str);
 }

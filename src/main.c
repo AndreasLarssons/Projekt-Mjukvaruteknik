@@ -25,11 +25,14 @@ void update();
 void close_window();
 void move_player();
 
-void draw(SDL_Surface *screen, SDL_Rect *player, SDL_Rect *other_player) {
+void draw(SDL_Surface *screen) {
 	draw_screen(screen);
-	draw_rect(screen, player);
-	draw_rect(screen, other_player);
+	//draw_rect(screen, player);
+	//draw_rect(screen, other_player);
 	draw_rect(screen, &players[0]);
+	draw_rect(screen, &players[1]);
+	draw_rect(screen, &players[2]);
+	draw_rect(screen, &players[3]);
 	//printf("\n%d %d\n", other_player->x, other_player->y);
 
 }
@@ -50,20 +53,28 @@ void close_window(bool *is_running) {
 void move_player(SDL_Rect *player, thread_data *thread_recv_info){
 	Uint8 *keystates = SDL_GetKeyState( NULL);
 	if (keystates[SDLK_UP]) {
-		player->y -= 3;
-		cord_trans(player->x, player->y, thread_recv_info);
+		//player->y -= 3;
+		//cord_trans(player->x, player->y, thread_recv_info);
+		players[thread_recv_info->id].y -= 3;
+		//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
 	}
 	if (keystates[SDLK_DOWN]) {
-		player->y += 3;
-		cord_trans(player->x, player->y, thread_recv_info);
+		//player->y += 3;
+		//cord_trans(player->x, player->y, thread_recv_info);
+		players[thread_recv_info->id].y += 3;
+		//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
 	}
 	if (keystates[SDLK_RIGHT]) {
-		player->x += 3;
-		cord_trans(player->x, player->y, thread_recv_info);
+		//player->x += 3;
+		//cord_trans(player->x, player->y, thread_recv_info);
+		players[thread_recv_info->id].x += 3;
+		//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
 	}
 	if (keystates[SDLK_LEFT]) {
-		player->x -= 3;
-		cord_trans(player->x, player->y, thread_recv_info);
+		//player->x -= 3;
+		//cord_trans(player->x, player->y, thread_recv_info);
+		players[thread_recv_info->id].x -= 3;
+		//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
 	}
 
 }
@@ -89,12 +100,23 @@ int main(int argc, char **arg) {
 	}
 
 	thread_data thread_recv_info;
-	thread_recv_info.other_player = create_rect(x, y+100, 100, 100);
-	SDL_Thread *net_thread_recv = NULL;
+	thread_recv_info.x = x;
+	thread_recv_info.y = y;
+	thread_recv_info.ready = 0;
 
-	players[0] = create_rect(x+150, y+150, 100, 100);
+	//thread_recv_info.other_player = create_rect(x, y+100, 100, 100);
+	SDL_Thread *net_thread_recv = NULL;
+	SDL_Thread *net_thread_trans = NULL;
+
+	players[0] = create_rect(x, y, 100, 100);
+	players[1] = create_rect(x, y, 100, 100);
+	players[2] = create_rect(x, y, 100, 100);
+	players[3] = create_rect(x, y, 100, 100);
 
 	net_thread_recv = SDL_CreateThread(network_recv, &thread_recv_info);
+
+	while(thread_recv_info.ready != 1);
+	net_thread_trans = SDL_CreateThread(network_trans, &thread_recv_info);
 
 	if(net_thread_recv == NULL){
 		printf("\nSDL_CreateThread failed: %s\n", SDL_GetError());
@@ -111,7 +133,7 @@ int main(int argc, char **arg) {
 			update(&player, &is_running, &thread_recv_info);
 			lastUpdateTime = current_time;
 		}
-		draw(screen, &player, &thread_recv_info.other_player);
+		draw(screen);
 		close_window(&is_running);
 
 		SDL_BlitSurface(screen, NULL, screen, NULL);
