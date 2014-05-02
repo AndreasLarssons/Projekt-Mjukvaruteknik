@@ -18,14 +18,20 @@
 
 typedef int bool;
 
+SDL_Rect players[4];
+
 void draw();
 void update();
 void close_window();
 void move_player();
 
-void draw(SDL_Surface *screen, SDL_Rect *player) {
+void draw(SDL_Surface *screen, SDL_Rect *player, SDL_Rect *other_player) {
 	draw_screen(screen);
 	draw_rect(screen, player);
+	draw_rect(screen, other_player);
+	draw_rect(screen, &players[0]);
+	//printf("\n%d %d\n", other_player->x, other_player->y);
+
 }
 
 void update(SDL_Rect *player, bool *is_running, thread_data *thread_recv_info) {
@@ -65,7 +71,6 @@ void move_player(SDL_Rect *player, thread_data *thread_recv_info){
 int main(int argc, char **arg) {
 	srand(time(NULL));
 	SDL_Surface *screen;
-	TCPsocket tcpsock;
 	bool is_running = TRUE;
 	screen = NULL;
 	const int FPS = 1000 / 60;
@@ -73,18 +78,7 @@ int main(int argc, char **arg) {
 	int x = 1366 / 2 - 50;
 	int y = 768 / 2 - 50;
 	SDL_Rect player = create_rect(x, y, 100, 100);
-	//SDL_Rect rectangles[10];
 
-	//SDL_Rect *rectangles;
-	//rectangles = (SDL_Rect *) malloc(sizeof(SDL_Rect));
-//	int numbOfRect = 0;
-	//*rectangles = create_rect(x+50, y+50, 100, 100);
-//	for (; numbOfRect < 100; numbOfRect++) {
-//		rectangles = (SDL_Rect *) realloc(rectangles,
-//				(numbOfRect + 1) * sizeof(SDL_Rect));
-//		*(rectangles + numbOfRect) = create_rect(rand() % WIDTH + 1,
-//				rand() % HEIGHT + 1, 100, 100);
-//	}
 
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
 		return 0;
@@ -95,7 +89,10 @@ int main(int argc, char **arg) {
 	}
 
 	thread_data thread_recv_info;
+	thread_recv_info.other_player = create_rect(x, y+100, 100, 100);
 	SDL_Thread *net_thread_recv = NULL;
+
+	players[0] = create_rect(x+150, y+150, 100, 100);
 
 	net_thread_recv = SDL_CreateThread(network_recv, &thread_recv_info);
 
@@ -114,12 +111,9 @@ int main(int argc, char **arg) {
 			update(&player, &is_running, &thread_recv_info);
 			lastUpdateTime = current_time;
 		}
-		draw(screen, &player);
+		draw(screen, &player, &thread_recv_info.other_player);
 		close_window(&is_running);
-//		int i;
-//		for (i = 0; i < numbOfRect; i++) {
-//			draw_rect(screen, rectangles + i);
-//		}
+
 		SDL_BlitSurface(screen, NULL, screen, NULL);
 		SDL_Flip(screen);
 

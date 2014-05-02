@@ -11,17 +11,14 @@
 
 
 int network_recv(void *data){
-	SDL_Rect network_players[4];
-	int tot_net_players = 0;
 	char msg[MAX_LENGTH];
-	char trollmsg[] = {"TROLOLOLOL!"};
-	SDL_Rect other_player;
+	//SDL_Rect other_player = create_rect(0, 0, 10, 10);
+	int id = 0, x = 0, y = 0;
 
 	thread_data *thread_info = (thread_data *)data;
 
 	// Connects to localhost at port 9999 (client)
 	IPaddress ip;
-	//TCPsocket *tcpsock = (TCPsocket *)data;
 
 	// Connects to Server
 	if(SDLNet_ResolveHost(&ip, "130.229.175.121", 9999) == -1){
@@ -52,9 +49,11 @@ int network_recv(void *data){
 		}
 		else{
 			// Data has been received.
-			//other_player = create
+			sscanf(msg, "#%d|%d|%d#", &id, &x, &y);
+			thread_info->other_player.x = x;
+			thread_info->other_player.y = y;
 
-			//printf("\n%s\n", msg);
+			printf("\nx:%d y:%d\n", thread_info->other_player.x, thread_info->other_player.y);
 			//SDLNet_TCP_Send(*tcpsock, trollmsg, 12);
 		}
 
@@ -63,7 +62,12 @@ int network_recv(void *data){
 	return 0;
 }
 
-// # indicates that the message is containing player coordinates.
+int network_trans(void *data){
+
+	return 0;
+}
+
+// # is the start and end character of the message.
 void cord_trans(int x, int y, thread_data *thread_recv_info){
 	char str[20];
 	sprintf(str, "#%d|%d|%d#",thread_recv_info->thread_id, x, y);
