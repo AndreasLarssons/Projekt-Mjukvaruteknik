@@ -70,7 +70,7 @@ int network_recv(void *data){
 int network_trans(void *data){
 	thread_data *thread_info = (thread_data *)data;
 	while(1){
-		SDL_Delay(100);
+		SDL_Delay(5);
 		cord_trans(thread_info->x, thread_info->y, thread_info);
 	}
 	return 0;

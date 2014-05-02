@@ -15,6 +15,7 @@
 #define WIDTH 1366
 #define HEIGHT 768
 #define DEPTH 32
+#define VELOCITY 10
 
 typedef int bool;
 
@@ -37,8 +38,8 @@ void draw(SDL_Surface *screen) {
 
 }
 
-void update(SDL_Rect *player, bool *is_running, thread_data *thread_recv_info) {
-	move_player(player, thread_recv_info);
+void update(SDL_Rect *player, bool *is_running, thread_data *thread_recv_info, int lastupdatetime) {
+	move_player(player, thread_recv_info, lastupdatetime);
 }
 
 void close_window(bool *is_running) {
@@ -50,30 +51,30 @@ void close_window(bool *is_running) {
 	}
 }
 
-void move_player(SDL_Rect *player, thread_data *thread_recv_info){
+void move_player(SDL_Rect *player, thread_data *thread_recv_info, int lastupdatetime){
 	Uint8 *keystates = SDL_GetKeyState( NULL);
 	if (keystates[SDLK_UP]) {
 		//player->y -= 3;
 		//cord_trans(player->x, player->y, thread_recv_info);
-		players[thread_recv_info->id].y -= 3;
+		players[thread_recv_info->id].y -= VELOCITY * lastupdatetime;
 		//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
 	}
 	if (keystates[SDLK_DOWN]) {
 		//player->y += 3;
 		//cord_trans(player->x, player->y, thread_recv_info);
-		players[thread_recv_info->id].y += 3;
+		players[thread_recv_info->id].y += VELOCITY * lastupdatetime;;
 		//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
 	}
 	if (keystates[SDLK_RIGHT]) {
 		//player->x += 3;
 		//cord_trans(player->x, player->y, thread_recv_info);
-		players[thread_recv_info->id].x += 3;
+		players[thread_recv_info->id].x += VELOCITY * lastupdatetime;;
 		//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
 	}
 	if (keystates[SDLK_LEFT]) {
 		//player->x -= 3;
 		//cord_trans(player->x, player->y, thread_recv_info);
-		players[thread_recv_info->id].x -= 3;
+		players[thread_recv_info->id].x -= VELOCITY * lastupdatetime;;
 		//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
 	}
 
@@ -84,8 +85,8 @@ int main(int argc, char **arg) {
 	SDL_Surface *screen;
 	bool is_running = TRUE;
 	screen = NULL;
-	const int FPS = 1000 / 60;
-	Uint32 lastUpdateTime = SDL_GetTicks();
+	const int FPS = 1000 / 100;
+	Uint32 lastUpdateTime;
 	int x = 1366 / 2 - 50;
 	int y = 768 / 2 - 50;
 	SDL_Rect player = create_rect(x, y, 100, 100);
@@ -122,17 +123,18 @@ int main(int argc, char **arg) {
 		printf("\nSDL_CreateThread failed: %s\n", SDL_GetError());
 		return -1;
 	}
-
-
+	Uint32 current_time = SDL_GetTicks() / 25;
 	while (is_running) {
-		Uint32 current_time = SDL_GetTicks();
 		Uint32 difference = current_time - lastUpdateTime;
+		lastUpdateTime = current_time;
+		current_time = SDL_GetTicks() / 25;
 		SDL_FreeSurface(screen);
-		while (difference >= FPS) {
-			difference -= FPS;
-			update(&player, &is_running, &thread_recv_info);
-			lastUpdateTime = current_time;
-		}
+//		while (difference >= FPS) {
+//			difference -= FPS;
+//			update(&player, &is_running, &thread_recv_info);
+//			lastUpdateTime = current_time;
+//		}
+		update(&player, &is_running, &thread_recv_info, current_time - lastUpdateTime);
 		draw(screen);
 		close_window(&is_running);
 
