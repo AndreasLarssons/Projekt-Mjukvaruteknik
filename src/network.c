@@ -21,7 +21,7 @@ int network_recv(void *data){
 	IPaddress ip;
 
 	// Connects to Server
-	if(SDLNet_ResolveHost(&ip, "130.229.175.121", 9999) == -1){
+	if(SDLNet_ResolveHost(&ip, "172.20.10.9", 9999) == -1){
 		printf("SDLNet_ResolveHost: %s\n", SDLNet_GetError());
 		exit(1);
 	}
@@ -49,17 +49,26 @@ int network_recv(void *data){
 	thread_info->ready = 1;
 
 	// Tries to receive a message to the server, if successful it prints the message and sends back a message.
+	node * tmp = NULL;
 	while(1){
 		if(SDLNet_TCP_Recv(thread_info->tcpsock, msg, MAX_LENGTH) <= 0){
 			// An error could have occurred.
 		}
 		else{
 			// Data has been received.
-			sscanf(msg, "#%d|%d|%d#", &id, &x, &y);
-			if(id != thread_info->id){
-				players[id].x = x;
-				players[id].y = y;
-				printf("\nid:%d x:%d y:%d\n", id, x, y);
+			if(sscanf(msg, "#%d|%d|%d#", &id, &x, &y) == 3){
+				if(id != thread_info->id){
+					players[id].x = x;
+					players[id].y = y;
+					printf("\nid:%d x:%d y:%d\n", id, x, y);
+				}
+			}
+			if(sscanf(msg, "*%d|%d|%d*", &id, &x, &y) == 3){
+
+				tmp = search_node(thread_info->root, id);
+				printf("%d\n",tmp->astroid.id);
+				tmp->astroid.rect.x = x;
+				tmp->astroid.rect.y = y;
 			}
 		}
 	}

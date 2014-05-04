@@ -10,6 +10,7 @@
 #include <SDL/SDL_thread.h>
 #include "draw.h"
 #include "network.h"
+#include "helperfunc.h"
 #define TRUE 1
 #define FALSE 0
 #define WIDTH 1366
@@ -26,14 +27,24 @@ void update();
 void close_window();
 void move_player();
 
-void draw(SDL_Surface *screen) {
+void draw(SDL_Surface *screen, node * root) {
 	draw_screen(screen);
 	//draw_rect(screen, player);
 	//draw_rect(screen, other_player);
-	draw_rect(screen, &players[0]);
-	draw_rect(screen, &players[1]);
-	draw_rect(screen, &players[2]);
-	draw_rect(screen, &players[3]);
+	int i;
+	for(i = 0; i < 4; i++){
+		draw_rect(screen, &players[i]);
+	}
+//	draw_rect(screen,&players[0]);
+//	draw_rect(screen,&players[1]);
+//	draw_rect(screen,&players[2]);
+//	draw_rect(screen,&players[3]);
+	node * tmp = root;
+	for (i = 0; i < 10; i++){
+		draw_rect(screen, &tmp->astroid.rect);
+		tmp = tmp->next;
+	}
+
 	//printf("\n%d %d\n", other_player->x, other_player->y);
 
 }
@@ -89,6 +100,12 @@ int main(int argc, char **arg) {
 	Uint32 lastUpdateTime;
 	int x = 1366 / 2 - 50;
 	int y = 768 / 2 - 50;
+	node *root;
+	create_linked_list(root);
+	fill_list(&root, 0, 0, 10);
+	fill_astroid_rect(root, 10, 10);
+
+
 	SDL_Rect player = create_rect(x, y, 100, 100);
 
 
@@ -104,6 +121,7 @@ int main(int argc, char **arg) {
 	thread_recv_info.x = x;
 	thread_recv_info.y = y;
 	thread_recv_info.ready = 0;
+	thread_recv_info.root = root;
 
 	//thread_recv_info.other_player = create_rect(x, y+100, 100, 100);
 	SDL_Thread *net_thread_recv = NULL;
@@ -129,13 +147,8 @@ int main(int argc, char **arg) {
 		lastUpdateTime = current_time;
 		current_time = SDL_GetTicks() / 25;
 		SDL_FreeSurface(screen);
-//		while (difference >= FPS) {
-//			difference -= FPS;
-//			update(&player, &is_running, &thread_recv_info);
-//			lastUpdateTime = current_time;
-//		}
 		update(&player, &is_running, &thread_recv_info, current_time - lastUpdateTime);
-		draw(screen);
+		draw(screen, root);
 		close_window(&is_running);
 
 		SDL_BlitSurface(screen, NULL, screen, NULL);

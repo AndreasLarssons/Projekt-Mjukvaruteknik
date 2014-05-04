@@ -9,10 +9,12 @@
 #define NETWORK_H_
 
 #include <SDL/SDL_net.h>
+#include "helperfunc.h"
 
 typedef struct thread_data{
 	TCPsocket tcpsock;
 	int id, x, y, ready;
+	node *root;
 }thread_data;
 
 extern int network_recv();
