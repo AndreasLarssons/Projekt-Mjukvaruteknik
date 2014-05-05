@@ -21,7 +21,7 @@ int network_recv(void *data){
 	IPaddress ip;
 
 	// Connects to Server
-	if(SDLNet_ResolveHost(&ip, "172.20.10.9", 9999) == -1){
+	if(SDLNet_ResolveHost(&ip, "127.0.0.1", 9999) == -1){
 		printf("SDLNet_ResolveHost: %s\n", SDLNet_GetError());
 		exit(1);
 	}
