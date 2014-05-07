@@ -11,37 +11,42 @@
 #include "draw.h"
 #include "network.h"
 #include "helperfunc.h"
+#include <SDL/SDL_rotozoom.h>
+#include <math.h>
+#include "main.h"
 #define TRUE 1
 #define FALSE 0
 #define WIDTH 1366
 #define HEIGHT 768
 #define DEPTH 32
 #define VELOCITY 10
+#define PI 3.14159265
 
 typedef int bool;
 
-SDL_Rect players[4];
-
-void draw();
-void update();
-void close_window();
-void move_player();
-
-void draw(SDL_Surface *screen, SDL_Surface *ship, node * root) {
+void draw(SDL_Surface *screen, node * root) {
 	draw_screen(screen);
-	//draw_rect(screen, player);
-	//draw_rect(screen, other_player);
 	int i;
 //	for(i = 0; i < 4; i++){
 //		draw_rect(screen, &players[i]);
 //	}
 	for (i = 0; i < 4; i++) {
-		SDL_BlitSurface(ship, NULL, screen, &players[i]);
+		SDL_Surface *rotated = rotozoomSurface(ship, players[i].angle, 1, SMOOTHING_ON);
+//		players[0].x -= (rotated->w / 2) - (ship->w / 2);
+//		players[0].y -= (rotated->h / 2) - (ship->h / 2);
+		SDL_Rect rect = { 200, 200, 0, 0 };
+		rect = players[i].rect;
+		rect.x -= (rotated->w / 2) - (ship->w / 2);
+		rect.y -= (rotated->h / 2) - (ship->h / 2);
+		SDL_BlitSurface(rotated, NULL, screen, &rect);
+		SDL_FreeSurface(rotated);
+		if (players[i].angle == 360) {
+			players[i].angle = 0;
+		} else if (players[i].angle < 0) {
+			players[i].angle = angle * -1;
+			players[i].angle = 360 - angle;
+		}
 	}
-//	draw_rect(screen,&players[0]);
-//	draw_rect(screen,&players[1]);
-//	draw_rect(screen,&players[2]);
-//	draw_rect(screen,&players[3]);
 	node * tmp = root;
 	for (i = 0; i < 10; i++) {
 		draw_rect(screen, &tmp->astroid.rect);
@@ -52,9 +57,10 @@ void draw(SDL_Surface *screen, SDL_Surface *ship, node * root) {
 
 }
 
-void update(SDL_Rect *player, bool *is_running, thread_data *thread_recv_info,
-		int lastupdatetime) {
-	move_player(player, thread_recv_info, lastupdatetime);
+void update(SDL_Rect *player, SDL_Surface *screen, bool *is_running,
+		thread_data *thread_recv_info, int lastupdatetime) {
+	move_player(player, screen, ship, angle, *thread_recv_info, lastupdatetime);
+
 }
 
 void close_window(bool *is_running) {
@@ -66,44 +72,57 @@ void close_window(bool *is_running) {
 	}
 }
 
-void move_player(SDL_Rect *player, thread_data *thread_recv_info,
-		int lastupdatetime) {
+void move_player(SDL_Rect *player, SDL_Surface *screen,
+		thread_data thread_recv_info, int lastupdatetime) {
 	Uint8 *keystates = SDL_GetKeyState( NULL);
+	//printf("%d\n" , thread_recv_info.id);
 	if (keystates[SDLK_UP]) {
 		//player->y -= 3;
 		//cord_trans(player->x, player->y, thread_recv_info);
-		players[thread_recv_info->id].y -= VELOCITY * lastupdatetime;
+		//
 		//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
+		//printf("%d \n", thread_recv_info.id);
+		players[thread_recv_info.id].rect.x += sin(players[thread_recv_info.id].angle * PI / 180) * 8;
+
+		players[thread_recv_info.id].rect.y += cos(players[thread_recv_info.id].angle  * PI / 180) * 8;
+
 	}
 	if (keystates[SDLK_DOWN]) {
 		//player->y += 3;
 		//cord_trans(player->x, player->y, thread_recv_info);
-		players[thread_recv_info->id].y += VELOCITY * lastupdatetime;
-		;
+		//players[thread_recv_info->id].y += VELOCITY * lastupdatetime;
 		//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
+
+		players[thread_recv_info.id].rect.x -= sin(players[thread_recv_info.id].angle  * PI / 180) * 8;
+		players[thread_recv_info.id].rect.y -= cos(players[thread_recv_info.id].angle  * PI / 180) * 8;
+
 	}
 	if (keystates[SDLK_RIGHT]) {
 		//player->x += 3;
 		//cord_trans(player->x, player->y, thread_recv_info);
-		players[thread_recv_info->id].x += VELOCITY * lastupdatetime;
-		;
+		//players[thread_recv_info->id].x += VELOCITY * lastupdatetime;
 		//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
+
+		players[thread_recv_info.id].angle += 2;
+
 	}
 	if (keystates[SDLK_LEFT]) {
 		//player->x -= 3;
 		//cord_trans(player->x, player->y, thread_recv_info);
-		players[thread_recv_info->id].x -= VELOCITY * lastupdatetime;
-		;
+		//players[thread_recv_info->id].x -= VELOCITY * lastupdatetime;
 		//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
+
+		players[thread_recv_info.id].angle -= 2;
 	}
 
 }
 
 int main(int argc, char **arg) {
 	srand(time(NULL));
-	SDL_Surface *screen, *ship;
+	SDL_Surface *screen;
 	bool is_running = TRUE;
 	screen = NULL;
+	angle = 0;
 	const int FPS = 1000 / 100;
 	Uint32 lastUpdateTime;
 	int x = 1366 / 2 - 50;
@@ -113,7 +132,7 @@ int main(int argc, char **arg) {
 	fill_list(&root, 0, 0, 10);
 	fill_astroid_rect(root, 10, 10);
 
-	SDL_Rect player = create_rect(x, y, 100, 100);
+	//ship = IMG_Load("Spaceship.png");
 	ship = IMG_Load("Spaceship.png");
 	if (!ship) {
 		printf("Cannot load file");
@@ -123,7 +142,7 @@ int main(int argc, char **arg) {
 		return 0;
 	}
 	if (!(screen = SDL_SetVideoMode(WIDTH, HEIGHT, DEPTH,
-			SDL_HWSURFACE | SDL_DOUBLEBUF))) {
+	SDL_HWSURFACE | SDL_DOUBLEBUF))) {
 		SDL_Quit();
 		return 1;
 	}
@@ -137,11 +156,11 @@ int main(int argc, char **arg) {
 	//thread_recv_info.other_player = create_rect(x, y+100, 100, 100);
 	SDL_Thread *net_thread_recv = NULL;
 	SDL_Thread *net_thread_trans = NULL;
-
-	players[0] = create_rect(x, y, 100, 100);
-	players[1] = create_rect(x, y, 100, 100);
-	players[2] = create_rect(x, y, 100, 100);
-	players[3] = create_rect(x, y, 100, 100);
+	int i;
+	for (i = 0; i < 4; i++){
+		players[i].rect = create_rect(x, y, 100, 100);
+		players[i].angle = 0;
+	}
 
 	net_thread_recv = SDL_CreateThread(network_recv, &thread_recv_info);
 
@@ -153,18 +172,16 @@ int main(int argc, char **arg) {
 		printf("\nSDL_CreateThread failed: %s\n", SDL_GetError());
 		return -1;
 	}
+
 	Uint32 current_time = SDL_GetTicks() / 25;
 	while (is_running) {
-		Uint32 difference = current_time - lastUpdateTime;
 		lastUpdateTime = current_time;
 		current_time = SDL_GetTicks() / 25;
 		SDL_FreeSurface(screen);
-		update(&player, &is_running, &thread_recv_info,
-				current_time - lastUpdateTime);
-		draw(screen, ship, root);
+		update(&players[thread_recv_info.id].rect, &is_running, screen,
+				&thread_recv_info, (int) (current_time - lastUpdateTime));
+		draw(screen, root);
 		close_window(&is_running);
-
-		SDL_BlitSurface(screen, NULL, screen, NULL);
 		SDL_Flip(screen);
 
 	}
