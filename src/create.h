@@ -13,6 +13,7 @@ struct astroid {
 	int id;
 	SDL_Rect rect;
 	int velocity;
+	int direction;
 
 }typedef astroid;
 

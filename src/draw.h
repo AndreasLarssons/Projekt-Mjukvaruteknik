@@ -21,6 +21,7 @@ extern void apply_surface(SDL_Surface *ship, SDL_Surface *screen, SDL_Rect *play
 //extern SDL_Surface * rotate();
 extern void rotate();
 extern void update_rect();
+extern void change_astroid();
 extern player players[4];
 
 

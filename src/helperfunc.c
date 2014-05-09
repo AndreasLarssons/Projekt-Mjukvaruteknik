@@ -7,7 +7,7 @@
 #include "helperfunc.h"
 #include "draw.h"
 #include <stdlib.h>
-#define VELOCITY 10
+#define VELOCITY 5
 
 void create_linked_list(node *root) {
 	root = malloc(sizeof(node));
@@ -31,6 +31,7 @@ void add_item_beginning(node ** root, float x, float y, int id) {
 	new_astroid->velocity = VELOCITY;
 	new_astroid->rect.x = x;
 	new_astroid->rect.y = y;
+	new_astroid->direction = rand() % 4;
 	new_node->astroid = *new_astroid;
 	new_node->next = *root;
 	*root = new_node;

@@ -1,4 +1,6 @@
 #include "draw.h"
+#include "helperfunc.h"
+#include "create.h"
 
 void draw_screen(SDL_Surface *screen) {
 
@@ -32,6 +34,20 @@ SDL_Surface *load_image(char *filename) {
 void apply_surface(SDL_Surface *ship, SDL_Surface *screen, SDL_Rect *player) {
 
 	SDL_BlitSurface(ship, NULL, screen, player);
+}
+
+void change_astroid(astroid *astroid) {
+	if (astroid->direction == RIGHT) {
+		astroid->rect.x -= astroid->velocity;
+		astroid->rect.y += astroid->velocity;
+	} else if (astroid->direction == LEFT) {
+		astroid->rect.x += astroid->velocity;
+		astroid->rect.y += astroid->velocity;
+
+	} else if (astroid->direction == UP) {
+		astroid->rect.x -= astroid->velocity;
+		astroid->rect.y -= astroid->velocity;
+	}
 }
 
 //SDL_Surface *rotate (SDL_Surface *s, SDL_Surface *pic, double angle, double zoom)

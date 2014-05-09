@@ -9,6 +9,9 @@
 #define HELPERFUNC_H_
 #include <SDL/SDL.h>
 #include "create.h"
+#define LEFT 3
+#define RIGHT 2
+#define UP 1
 struct node {
 	astroid astroid;
 	struct node *next;
