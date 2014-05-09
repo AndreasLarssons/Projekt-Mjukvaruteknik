@@ -14,6 +14,8 @@
 #include <SDL/SDL_rotozoom.h>
 #include <math.h>
 #include "main.h"
+#include "collision.h"
+#include <SDL/SDL_framerate.h>
 #define TRUE 1
 #define FALSE 0
 #define WIDTH 1366
@@ -31,7 +33,8 @@ void draw(SDL_Surface *screen, node * root) {
 //		draw_rect(screen, &players[i]);
 //	}
 	for (i = 0; i < 4; i++) {
-		SDL_Surface *rotated = rotozoomSurface(ship, players[i].angle, 1, SMOOTHING_ON);
+		SDL_Surface *rotated = rotozoomSurface(ship, players[i].angle, 1,
+				SMOOTHING_ON);
 //		players[0].x -= (rotated->w / 2) - (ship->w / 2);
 //		players[0].y -= (rotated->h / 2) - (ship->h / 2);
 		SDL_Rect rect = { 200, 200, 0, 0 };
@@ -77,43 +80,43 @@ void move_player(SDL_Rect *player, SDL_Surface *screen,
 	Uint8 *keystates = SDL_GetKeyState( NULL);
 	//printf("%d\n" , thread_recv_info.id);
 	if (keystates[SDLK_UP]) {
-		//player->y -= 3;
-		//cord_trans(player->x, player->y, thread_recv_info);
-		//
-		//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
-		//printf("%d \n", thread_recv_info.id);
-		players[thread_recv_info.id].rect.x += sin(players[thread_recv_info.id].angle * PI / 180) * 8;
+			//player->y -= 3;
+			//cord_trans(player->x, player->y, thread_recv_info);
+			//
+			//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
+			//printf("%d \n", thread_recv_info.id);
+			players[thread_recv_info.id].rect.x -= sin(players[thread_recv_info.id].angle * PI / 180) * 8;
 
-		players[thread_recv_info.id].rect.y += cos(players[thread_recv_info.id].angle  * PI / 180) * 8;
+			players[thread_recv_info.id].rect.y -= cos(players[thread_recv_info.id].angle  * PI / 180) * 8;
 
-	}
-	if (keystates[SDLK_DOWN]) {
-		//player->y += 3;
-		//cord_trans(player->x, player->y, thread_recv_info);
-		//players[thread_recv_info->id].y += VELOCITY * lastupdatetime;
-		//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
+		}
+		if (keystates[SDLK_DOWN]) {
+			//player->y += 3;
+			//cord_trans(player->x, player->y, thread_recv_info);
+			//players[thread_recv_info->id].y += VELOCITY * lastupdatetime;
+			//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
 
-		players[thread_recv_info.id].rect.x -= sin(players[thread_recv_info.id].angle  * PI / 180) * 8;
-		players[thread_recv_info.id].rect.y -= cos(players[thread_recv_info.id].angle  * PI / 180) * 8;
+			players[thread_recv_info.id].rect.x += sin(players[thread_recv_info.id].angle  * PI / 180) * 8;
+			players[thread_recv_info.id].rect.y += cos(players[thread_recv_info.id].angle  * PI / 180) * 8;
 
-	}
-	if (keystates[SDLK_RIGHT]) {
-		//player->x += 3;
-		//cord_trans(player->x, player->y, thread_recv_info);
-		//players[thread_recv_info->id].x += VELOCITY * lastupdatetime;
-		//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
+		}
+		if (keystates[SDLK_RIGHT]) {
+			//player->x += 3;
+			//cord_trans(player->x, player->y, thread_recv_info);
+			//players[thread_recv_info->id].x += VELOCITY * lastupdatetime;
+			//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
 
-		players[thread_recv_info.id].angle += 2;
+			players[thread_recv_info.id].angle += 5;
 
-	}
-	if (keystates[SDLK_LEFT]) {
-		//player->x -= 3;
-		//cord_trans(player->x, player->y, thread_recv_info);
-		//players[thread_recv_info->id].x -= VELOCITY * lastupdatetime;
-		//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
+		}
+		if (keystates[SDLK_LEFT]) {
+			//player->x -= 3;
+			//cord_trans(player->x, player->y, thread_recv_info);
+			//players[thread_recv_info->id].x -= VELOCITY * lastupdatetime;
+			//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
 
-		players[thread_recv_info.id].angle -= 2;
-	}
+			players[thread_recv_info.id].angle -= 5;
+		}
 
 }
 
@@ -133,7 +136,7 @@ int main(int argc, char **arg) {
 	fill_astroid_rect(root, 10, 10);
 
 	//ship = IMG_Load("Spaceship.png");
-	ship = IMG_Load("Spaceship.png");
+	ship = IMG_Load("Ship.png");
 	if (!ship) {
 		printf("Cannot load file");
 	}
@@ -147,6 +150,10 @@ int main(int argc, char **arg) {
 		return 1;
 	}
 
+	FPSmanager manager = { 0 };
+	SDL_initFramerate(&manager);
+	SDL_setFramerate(&manager, 60);
+
 	thread_data thread_recv_info;
 	thread_recv_info.x = x;
 	thread_recv_info.y = y;
@@ -157,8 +164,8 @@ int main(int argc, char **arg) {
 	SDL_Thread *net_thread_recv = NULL;
 	SDL_Thread *net_thread_trans = NULL;
 	int i;
-	for (i = 0; i < 4; i++){
-		players[i].rect = create_rect(x, y, 100, 100);
+	for (i = 0; i < 4; i++) {
+		players[i].rect = create_rect(x, y, 40, 40);
 		players[i].angle = 0;
 	}
 
@@ -180,8 +187,10 @@ int main(int argc, char **arg) {
 		SDL_FreeSurface(screen);
 		update(&players[thread_recv_info.id].rect, &is_running, screen,
 				&thread_recv_info, (int) (current_time - lastUpdateTime));
+		collision(players[thread_recv_info.id].rect,  players[1].rect, root);
 		draw(screen, root);
 		close_window(&is_running);
+		SDL_framerateDelay(&manager);
 		SDL_Flip(screen);
 
 	}
