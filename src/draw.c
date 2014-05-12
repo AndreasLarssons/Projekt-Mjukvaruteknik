@@ -1,5 +1,5 @@
 #include "draw.h"
-
+#include "main.h"
 void draw_screen(SDL_Surface *screen) {
 
 	Uint32 color = SDL_MapRGB(screen->format, 0, 125, 255);
@@ -29,10 +29,24 @@ SDL_Surface *load_image(char *filename) {
 	return optimizedImage;
 }
 
-void apply_surface(SDL_Surface *ship, SDL_Surface *screen, SDL_Rect *player) {
-
-	SDL_BlitSurface(ship, NULL, screen, player);
+void draw_bullet(SDL_Rect *bullet, bool *alive, SDL_Surface *shot,
+		SDL_Surface *screen) {
+	if (*alive) {
+		apply_surface(bullet->x, bullet->y, shot, screen);
+	}
 }
+
+void apply_surface(int x, int y, SDL_Surface *ship, SDL_Surface *screen) {
+	SDL_Rect temp;
+	temp.x = x;
+	temp.y = y;
+	SDL_BlitSurface(ship, NULL, screen, &temp);
+}
+
+//void apply_surface(SDL_Surface *ship, SDL_Surface *screen, SDL_Rect *player) {
+//
+//	SDL_BlitSurface(ship, NULL, screen, player);
+//}
 
 //SDL_Surface *rotate (SDL_Surface *s, SDL_Surface *pic, double angle, double zoom)
 //{

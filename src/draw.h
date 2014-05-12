@@ -17,10 +17,10 @@
 extern void draw_screen();
 extern SDL_Rect draw_rect();
 extern SDL_Rect create_rect();
-extern void apply_surface(SDL_Surface *ship, SDL_Surface *screen, SDL_Rect *player);
 //extern SDL_Surface * rotate();
 extern void rotate();
 extern void update_rect();
+void apply_surface();
 extern player players[4];
 
 

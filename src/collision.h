@@ -11,5 +11,6 @@
 extern SDL_Rect create_hitbox();
 extern int hit_test();
 extern void collision();
+extern void bullet_collision();
 
 #endif /* COLLISION_H_ */

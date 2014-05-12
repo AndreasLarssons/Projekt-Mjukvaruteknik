@@ -11,22 +11,15 @@
 #include "draw.h"
 #include "network.h"
 #include "helperfunc.h"
+#include "create.h"
 #include <SDL/SDL_rotozoom.h>
 #include <math.h>
 #include "main.h"
 #include "collision.h"
 #include <SDL/SDL_framerate.h>
-#define TRUE 1
-#define FALSE 0
-#define WIDTH 1366
-#define HEIGHT 768
-#define DEPTH 32
-#define VELOCITY 10
-#define PI 3.14159265
 
-typedef int bool;
-
-void draw(SDL_Surface *screen, node * root) {
+void draw(SDL_Surface *screen, node * root, bullet bullets[],
+		thread_data thread_recv_info, SDL_Surface *astroid) {
 	draw_screen(screen);
 	int i;
 //	for(i = 0; i < 4; i++){
@@ -34,7 +27,7 @@ void draw(SDL_Surface *screen, node * root) {
 //	}
 	for (i = 0; i < 4; i++) {
 		SDL_Surface *rotated = rotozoomSurface(ship, players[i].angle, 1,
-				SMOOTHING_ON);
+		SMOOTHING_ON);
 //		players[0].x -= (rotated->w / 2) - (ship->w / 2);
 //		players[0].y -= (rotated->h / 2) - (ship->h / 2);
 		SDL_Rect rect = { 200, 200, 0, 0 };
@@ -52,18 +45,28 @@ void draw(SDL_Surface *screen, node * root) {
 	}
 	node * tmp = root;
 	for (i = 0; i < 10; i++) {
-		draw_rect(screen, &tmp->astroid.rect);
+		//draw_rect(screen, &tmp->astroid.rect);
+		SDL_BlitSurface(astroid, NULL, screen, &tmp->astroid.rect);
 		tmp = tmp->next;
 	}
-
-	//printf("\n%d %d\n", other_player->x, other_player->y);
-
+	for (i = 0; i < 4; i++) {
+		if (bullets[i].alive == TRUE) {
+			if (bullets[i].rect.x > WIDTH - 1 || bullets[i].rect.x < 1
+					|| bullets[i].rect.y > HEIGHT || bullets[i].rect.y < 1) {
+				bullets[i].alive = FALSE;
+			} else {
+				bullets[i].rect.x -= sin(bullets[i].angle * PI / 180) * 9;
+				bullets[i].rect.y -= cos(bullets[i].angle * PI / 180) * 9;
+				SDL_BlitSurface(bullets[i].bullet, NULL, screen,
+						&bullets[i].rect);
+			}
+		}
+	}
 }
 
 void update(SDL_Rect *player, SDL_Surface *screen, bool *is_running,
-		thread_data *thread_recv_info, int lastupdatetime) {
-	move_player(player, screen, ship, angle, *thread_recv_info, lastupdatetime);
-
+		thread_data *thread_recv_info, bullet bullets[], int *cooldown , SDL_Surface *bullet_pic) {
+	move_player(player, screen, *thread_recv_info, bullets, cooldown, bullet_pic);
 }
 
 void close_window(bool *is_running) {
@@ -76,53 +79,78 @@ void close_window(bool *is_running) {
 }
 
 void move_player(SDL_Rect *player, SDL_Surface *screen,
-		thread_data thread_recv_info, int lastupdatetime) {
+		thread_data thread_recv_info, bullet bullets[], int *cooldown, SDL_Surface *bullet_pic) {
 	Uint8 *keystates = SDL_GetKeyState( NULL);
 	//printf("%d\n" , thread_recv_info.id);
 	if (keystates[SDLK_UP]) {
-			//player->y -= 3;
-			//cord_trans(player->x, player->y, thread_recv_info);
-			//
-			//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
-			//printf("%d \n", thread_recv_info.id);
-			players[thread_recv_info.id].rect.x -= sin(players[thread_recv_info.id].angle * PI / 180) * 8;
+		//player->y -= 3;
+		//cord_trans(player->x, player->y, thread_recv_info);
+		//
+		//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
+		//printf("%d \n", thread_recv_info.id);
+		players[thread_recv_info.id].rect.x -= sin(
+				players[thread_recv_info.id].angle * PI / 180) * 8;
+		players[thread_recv_info.id].rect.y -= cos(
+				players[thread_recv_info.id].angle * PI / 180) * 8;
 
-			players[thread_recv_info.id].rect.y -= cos(players[thread_recv_info.id].angle  * PI / 180) * 8;
+	}
+	if (keystates[SDLK_DOWN]) {
+		//player->y += 3;
+		//cord_trans(player->x, player->y, thread_recv_info);
+		//players[thread_recv_info->id].y += VELOCITY * lastupdatetime;
+		//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
 
+		players[thread_recv_info.id].rect.x += sin(
+				players[thread_recv_info.id].angle * PI / 180) * 8;
+		players[thread_recv_info.id].rect.y += cos(
+				players[thread_recv_info.id].angle * PI / 180) * 8;
+
+	}
+	if (keystates[SDLK_RIGHT]) {
+		//player->x += 3;
+		//cord_trans(player->x, player->y, thread_recv_info);
+		//players[thread_recv_info->id].x += VELOCITY * lastupdatetime;
+		//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
+
+		players[thread_recv_info.id].angle += 5;
+
+	}
+	if (keystates[SDLK_LEFT]) {
+		//player->x -= 3;
+		//cord_trans(player->x, player->y, thread_recv_info);
+		//players[thread_recv_info->id].x -= VELOCITY * lastupdatetime;
+		//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
+
+		players[thread_recv_info.id].angle -= 5;
+	}
+//		fire_bullet(bullets[check_bullet_slot(bullets, 5)], players[thread_recv_info.id].rect.x,
+//				players[thread_recv_info.id].rect.y,keystates );
+
+	if (keystates[SDLK_SPACE]) {
+		int slot = check_bullet_slot(bullets, 4);
+		if (*cooldown > 40 && slot != -1) {
+
+//		bullet bullet;
+//		bullet.alive = TRUE;
+//		bullet.rect = create_rect(0, 0, 10, 10);
+//		bullet.bullet = ship;
+			bullets[slot].alive = TRUE;
+			bullets[slot].rect = create_rect(
+					players[thread_recv_info.id].rect.x + 10,
+					players[thread_recv_info.id].rect.y - 10, 25, 25);
+			bullets[slot].angle = (int) players[thread_recv_info.id].angle;
+			bullets[slot].bullet = bullet_pic;
+			printf("Bullets fire %d\n", slot);
+			*cooldown = 0;
 		}
-		if (keystates[SDLK_DOWN]) {
-			//player->y += 3;
-			//cord_trans(player->x, player->y, thread_recv_info);
-			//players[thread_recv_info->id].y += VELOCITY * lastupdatetime;
-			//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
+	}
 
-			players[thread_recv_info.id].rect.x += sin(players[thread_recv_info.id].angle  * PI / 180) * 8;
-			players[thread_recv_info.id].rect.y += cos(players[thread_recv_info.id].angle  * PI / 180) * 8;
-
-		}
-		if (keystates[SDLK_RIGHT]) {
-			//player->x += 3;
-			//cord_trans(player->x, player->y, thread_recv_info);
-			//players[thread_recv_info->id].x += VELOCITY * lastupdatetime;
-			//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
-
-			players[thread_recv_info.id].angle += 5;
-
-		}
-		if (keystates[SDLK_LEFT]) {
-			//player->x -= 3;
-			//cord_trans(player->x, player->y, thread_recv_info);
-			//players[thread_recv_info->id].x -= VELOCITY * lastupdatetime;
-			//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
-
-			players[thread_recv_info.id].angle -= 5;
-		}
-
+	*cooldown += 1;
 }
 
 int main(int argc, char **arg) {
 	srand(time(NULL));
-	SDL_Surface *screen;
+	SDL_Surface *screen, *bullet_pic, *astroid;
 	bool is_running = TRUE;
 	screen = NULL;
 	angle = 0;
@@ -130,13 +158,17 @@ int main(int argc, char **arg) {
 	Uint32 lastUpdateTime;
 	int x = 1366 / 2 - 50;
 	int y = 768 / 2 - 50;
+	bullet bullets[5];
 	node *root;
 	create_linked_list(root);
 	fill_list(&root, 0, 0, 10);
 	fill_astroid_rect(root, 10, 10);
+	int cooldown = 0;
 
 	//ship = IMG_Load("Spaceship.png");
 	ship = IMG_Load("Ship.png");
+	bullet_pic = IMG_Load("Bullet.png");
+	astroid = IMG_Load("Astroid.png");
 	if (!ship) {
 		printf("Cannot load file");
 	}
@@ -180,15 +212,22 @@ int main(int argc, char **arg) {
 		return -1;
 	}
 
+	for (i = 0; i < 4; i++) {
+		bullets[i].alive = FALSE;
+		bullets[i].rect = create_rect(-10, -10, 25, 25);
+		bullets[i].bullet = bullet_pic;
+	}
+
 	Uint32 current_time = SDL_GetTicks() / 25;
 	while (is_running) {
 		lastUpdateTime = current_time;
 		current_time = SDL_GetTicks() / 25;
-		SDL_FreeSurface(screen);
-		update(&players[thread_recv_info.id].rect, &is_running, screen,
-				&thread_recv_info, (int) (current_time - lastUpdateTime));
-		collision(players[thread_recv_info.id].rect,  players[1].rect, root);
-		draw(screen, root);
+		//SDL_FreeSurface(screen);
+		update(&players[thread_recv_info.id].rect, screen, &is_running,
+				&thread_recv_info, bullets, &cooldown, bullet_pic);
+		collision(players[thread_recv_info.id].rect, root);
+		bullet_collision(bullets, root, 4);
+		draw(screen, root, bullets, thread_recv_info, astroid);
 		close_window(&is_running);
 		SDL_framerateDelay(&manager);
 		SDL_Flip(screen);

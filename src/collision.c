@@ -26,16 +26,26 @@ int hit_test(SDL_Rect source, SDL_Rect target){
 	return -1;
 }
 
-void collision (SDL_Rect player, SDL_Rect target, node * root){
+void collision (SDL_Rect player,node * root){
 	int i = 0;
 	node * tmp = root;
 	for (i = 0; i < 10; i++){
 		if (hit_test(player, tmp->astroid.rect) != -1){
-			printf("Collision\n");
+			printf("Collision + %d\n " , i);
 		}
 	tmp = tmp->next;
 	}
 //	if (hit_test(player, target) != -1){
 //		printf("Collision\n");
 //	}
+}
+
+void bullet_collision(bullet bullets[],node * root, int size){
+	int i;
+	for (i = 0; i < size; i++){
+		if (bullets[i].alive == TRUE){
+			collision(bullets[i].rect, root);
+		}
+
+	}
 }
