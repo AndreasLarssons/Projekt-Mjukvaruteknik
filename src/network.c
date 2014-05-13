@@ -13,7 +13,7 @@
 int network_recv(void *data){
 	char msg[MAX_LENGTH];
 	//SDL_Rect other_player = create_rect(0, 0, 10, 10);
-	int id = 0, x = 0, y = 0;
+	int id = 0, x = 0, y = 0, slot;
 	int angle = 0;
 
 	thread_data *thread_info = (thread_data *)data;
@@ -62,7 +62,7 @@ int network_recv(void *data){
 					players[id].rect.x = x;
 					players[id].rect.y = y;
 					players[id].angle = (double) angle;
-					printf("\nid:%d x:%d y:%d\n", id, x, y);
+					//printf("\nid:%d x:%d y:%d\n", id, x, y);
 				}
 			}
 			if(sscanf(msg, "*%d|%d|%d*", &id, &x, &y) == 3){
@@ -71,6 +71,13 @@ int network_recv(void *data){
 				//printf("%d\n",tmp->astroid.id);
 				tmp->astroid.rect.x = x;
 				tmp->astroid.rect.y = y;
+			}
+			if(sscanf(msg, "?%d|%d|%d|%d|%d?", &id, &slot, &x, &y, &angle) == 5){
+				bullets_other[id][slot].rect.x = x;
+				bullets_other[id][slot].rect.y = y;
+				bullets_other[id][slot].angle = angle;
+				bullets_other[id][slot].alive = TRUE;
+				printf("%s \n", msg);
 			}
 		}
 	}
@@ -94,4 +101,11 @@ void cord_trans(int x, int y, thread_data *thread_recv_info){
 			, (int)players[thread_recv_info->id].angle);
 	SDLNet_TCP_Send(thread_recv_info->tcpsock, str, 20);
 	//printf("\n%s\n", str);
+}
+
+void bullet_trans(int x, int y, int angle, int slot, thread_data *thread_recv_info){
+	char str[20];
+	sprintf(str, "?%d|%d|%d|%d|%d?", thread_recv_info->id, slot, x, y, angle);
+	SDLNet_TCP_Send(thread_recv_info->tcpsock, str, 20);
+	//printf("%s\n", str);
 }

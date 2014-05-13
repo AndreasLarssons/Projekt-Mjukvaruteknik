@@ -21,6 +21,8 @@ typedef struct thread_data{
 extern int network_recv();
 extern void cord_trans();
 extern int network_trans();
+extern void bullet_trans();
 extern player players[4];
+extern bullet bullets_other[4][4];
 
 #endif /* NETWORK_H_ */

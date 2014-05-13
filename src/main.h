@@ -36,6 +36,7 @@ struct bullet{
 
 
 player players[4];
+bullet bullets_other[4][4];
 void draw();
 void update();
 void close_window();

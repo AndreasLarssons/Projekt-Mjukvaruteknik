@@ -21,13 +21,13 @@
 void draw(SDL_Surface *screen, node * root, bullet bullets[],
 		thread_data thread_recv_info, SDL_Surface *astroid) {
 	draw_screen(screen);
-	int i;
+	int i, j;
 //	for(i = 0; i < 4; i++){
 //		draw_rect(screen, &players[i]);
 //	}
 	for (i = 0; i < 4; i++) {
 		SDL_Surface *rotated = rotozoomSurface(ship, players[i].angle, 1,
-		SMOOTHING_ON);
+				SMOOTHING_ON);
 //		players[0].x -= (rotated->w / 2) - (ship->w / 2);
 //		players[0].y -= (rotated->h / 2) - (ship->h / 2);
 		SDL_Rect rect = { 200, 200, 0, 0 };
@@ -55,6 +55,7 @@ void draw(SDL_Surface *screen, node * root, bullet bullets[],
 					|| bullets[i].rect.y > HEIGHT || bullets[i].rect.y < 1) {
 				bullets[i].alive = FALSE;
 			} else {
+
 				bullets[i].rect.x -= sin(bullets[i].angle * PI / 180) * 9;
 				bullets[i].rect.y -= cos(bullets[i].angle * PI / 180) * 9;
 				SDL_BlitSurface(bullets[i].bullet, NULL, screen,
@@ -62,11 +63,30 @@ void draw(SDL_Surface *screen, node * root, bullet bullets[],
 			}
 		}
 	}
+
+	for (i = 0; i < 4; i++) {
+		for (j = 0; j < 4; j++) {
+			if (bullets_other[i][j].alive == TRUE) {
+				if (bullets_other[i][j].rect.x > WIDTH - 1 || bullets_other[i][j].rect.x < 1
+						|| bullets_other[i][j].rect.y > HEIGHT
+						|| bullets_other[i][j].rect.y < 1) {
+					bullets_other[i][j].alive = FALSE;
+				} else {
+					bullets_other[i][j].rect.x -= sin(bullets_other[i][j].angle * PI / 180) * 9;
+					bullets_other[i][j].rect.y -= cos(bullets_other[i][j].angle * PI / 180) * 9;
+					SDL_BlitSurface(bullets_other[i][j].bullet, NULL, screen,
+							&bullets_other[i][j].rect);
+				}
+			}
+		}
+	}
 }
 
 void update(SDL_Rect *player, SDL_Surface *screen, bool *is_running,
-		thread_data *thread_recv_info, bullet bullets[], int *cooldown , SDL_Surface *bullet_pic) {
-	move_player(player, screen, *thread_recv_info, bullets, cooldown, bullet_pic);
+		thread_data *thread_recv_info, bullet bullets[], int *cooldown,
+		SDL_Surface *bullet_pic) {
+	move_player(player, screen, *thread_recv_info, bullets, cooldown,
+			bullet_pic);
 }
 
 void close_window(bool *is_running) {
@@ -79,8 +99,9 @@ void close_window(bool *is_running) {
 }
 
 void move_player(SDL_Rect *player, SDL_Surface *screen,
-		thread_data thread_recv_info, bullet bullets[], int *cooldown, SDL_Surface *bullet_pic) {
-	Uint8 *keystates = SDL_GetKeyState( NULL);
+		thread_data thread_recv_info, bullet bullets[], int *cooldown,
+		SDL_Surface *bullet_pic) {
+	Uint8 *keystates = SDL_GetKeyState(NULL);
 	//printf("%d\n" , thread_recv_info.id);
 	if (keystates[SDLK_UP]) {
 		//player->y -= 3;
@@ -112,7 +133,7 @@ void move_player(SDL_Rect *player, SDL_Surface *screen,
 		//players[thread_recv_info->id].x += VELOCITY * lastupdatetime;
 		//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
 
-		players[thread_recv_info.id].angle += 5;
+		players[thread_recv_info.id].angle -= 5;
 
 	}
 	if (keystates[SDLK_LEFT]) {
@@ -121,7 +142,7 @@ void move_player(SDL_Rect *player, SDL_Surface *screen,
 		//players[thread_recv_info->id].x -= VELOCITY * lastupdatetime;
 		//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
 
-		players[thread_recv_info.id].angle -= 5;
+		players[thread_recv_info.id].angle += 5;
 	}
 //		fire_bullet(bullets[check_bullet_slot(bullets, 5)], players[thread_recv_info.id].rect.x,
 //				players[thread_recv_info.id].rect.y,keystates );
@@ -141,6 +162,8 @@ void move_player(SDL_Rect *player, SDL_Surface *screen,
 			bullets[slot].angle = (int) players[thread_recv_info.id].angle;
 			bullets[slot].bullet = bullet_pic;
 			printf("Bullets fire %d\n", slot);
+			bullet_trans(bullets[slot].rect.x, bullets[slot].rect.y, bullets[slot].angle, slot,
+					&thread_recv_info);
 			*cooldown = 0;
 		}
 	}
@@ -177,7 +200,7 @@ int main(int argc, char **arg) {
 		return 0;
 	}
 	if (!(screen = SDL_SetVideoMode(WIDTH, HEIGHT, DEPTH,
-	SDL_HWSURFACE | SDL_DOUBLEBUF))) {
+			SDL_HWSURFACE | SDL_DOUBLEBUF))) {
 		SDL_Quit();
 		return 1;
 	}
@@ -195,7 +218,7 @@ int main(int argc, char **arg) {
 	//thread_recv_info.other_player = create_rect(x, y+100, 100, 100);
 	SDL_Thread *net_thread_recv = NULL;
 	SDL_Thread *net_thread_trans = NULL;
-	int i;
+	int i, j;
 	for (i = 0; i < 4; i++) {
 		players[i].rect = create_rect(x, y, 40, 40);
 		players[i].angle = 0;
@@ -216,6 +239,14 @@ int main(int argc, char **arg) {
 		bullets[i].alive = FALSE;
 		bullets[i].rect = create_rect(-10, -10, 25, 25);
 		bullets[i].bullet = bullet_pic;
+	}
+
+	for (i = 0; i < 4; i++) {
+		for (j = 0; j < 4; j++) {
+			bullets_other[i][j].alive = FALSE;
+			bullets_other[i][j].rect = create_rect(-10, -10, 25, 25);
+			bullets_other[i][j].bullet = bullet_pic;
+		}
 	}
 
 	Uint32 current_time = SDL_GetTicks() / 25;

@@ -31,7 +31,7 @@ void collision (SDL_Rect player,node * root){
 	node * tmp = root;
 	for (i = 0; i < 10; i++){
 		if (hit_test(player, tmp->astroid.rect) != -1){
-			printf("Collision + %d\n " , i);
+			//printf("Collision + %d\n " , i);
 		}
 	tmp = tmp->next;
 	}
