@@ -45,8 +45,8 @@ int network_recv(void *data){
 		SDLNet_TCP_Recv(thread_info->tcpsock, msg, MAX_LENGTH);
 	}
 	printf("\n%d\n", thread_info->id);
-	//players[thread_info->id].x = 1366 / 2 - 50;
-	//players[thread_info->id].y = 768 / 2 - 50;
+	players[thread_info->id].rect.x = 1366 / 2 - 50;
+	players[thread_info->id].rect.y = 768 / 2 - 50;
 	thread_info->ready = 1;
 
 	// Tries to receive a message to the server, if successful it prints the message and sends back a message.

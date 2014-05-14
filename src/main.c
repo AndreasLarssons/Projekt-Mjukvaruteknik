@@ -220,7 +220,7 @@ int main(int argc, char **arg) {
 	SDL_Thread *net_thread_trans = NULL;
 	int i, j;
 	for (i = 0; i < 4; i++) {
-		players[i].rect = create_rect(x, y, 40, 40);
+		players[i].rect = create_rect(-50, -50, 40, 40);
 		players[i].angle = 0;
 	}
 
