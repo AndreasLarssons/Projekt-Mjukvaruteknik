@@ -46,8 +46,15 @@ void draw(SDL_Surface *screen, node * root, bullet bullets[],
 	node * tmp = root;
 	for (i = 0; i < 10; i++) {
 		//draw_rect(screen, &tmp->astroid.rect);
-		SDL_BlitSurface(astroid, NULL, screen, &tmp->astroid.rect);
-		tmp = tmp->next;
+		if (tmp != NULL) {
+			if (i != 0) {
+				SDL_BlitSurface(astroid, NULL, screen, &tmp->astroid.rect);
+				tmp = tmp->next;
+			}else{
+				tmp = tmp->next;
+			}
+		}
+		//tmp = tmp->next;
 	}
 	for (i = 0; i < 4; i++) {
 		if (bullets[i].alive == TRUE) {
@@ -67,13 +74,16 @@ void draw(SDL_Surface *screen, node * root, bullet bullets[],
 	for (i = 0; i < 4; i++) {
 		for (j = 0; j < 4; j++) {
 			if (bullets_other[i][j].alive == TRUE) {
-				if (bullets_other[i][j].rect.x > WIDTH - 1 || bullets_other[i][j].rect.x < 1
+				if (bullets_other[i][j].rect.x > WIDTH - 1
+						|| bullets_other[i][j].rect.x < 1
 						|| bullets_other[i][j].rect.y > HEIGHT
 						|| bullets_other[i][j].rect.y < 1) {
 					bullets_other[i][j].alive = FALSE;
 				} else {
-					bullets_other[i][j].rect.x -= sin(bullets_other[i][j].angle * PI / 180) * 9;
-					bullets_other[i][j].rect.y -= cos(bullets_other[i][j].angle * PI / 180) * 9;
+					bullets_other[i][j].rect.x -= sin(
+							bullets_other[i][j].angle * PI / 180) * 9;
+					bullets_other[i][j].rect.y -= cos(
+							bullets_other[i][j].angle * PI / 180) * 9;
 					SDL_BlitSurface(bullets_other[i][j].bullet, NULL, screen,
 							&bullets_other[i][j].rect);
 				}
@@ -162,8 +172,8 @@ void move_player(SDL_Rect *player, SDL_Surface *screen,
 			bullets[slot].angle = (int) players[thread_recv_info.id].angle;
 			bullets[slot].bullet = bullet_pic;
 			printf("Bullets fire %d\n", slot);
-			bullet_trans(bullets[slot].rect.x, bullets[slot].rect.y, bullets[slot].angle, slot,
-					&thread_recv_info);
+			bullet_trans(bullets[slot].rect.x, bullets[slot].rect.y,
+					bullets[slot].angle, slot, &thread_recv_info);
 			*cooldown = 0;
 		}
 	}
@@ -177,8 +187,7 @@ int main(int argc, char **arg) {
 	bool is_running = TRUE;
 	screen = NULL;
 	angle = 0;
-	const int FPS = 1000 / 100;
-	Uint32 lastUpdateTime;
+
 	int x = 1366 / 2 - 50;
 	int y = 768 / 2 - 50;
 	bullet bullets[5];
@@ -188,7 +197,6 @@ int main(int argc, char **arg) {
 	fill_astroid_rect(root, 10, 10);
 	int cooldown = 0;
 
-	//ship = IMG_Load("Spaceship.png");
 	ship = IMG_Load("Ship.png");
 	bullet_pic = IMG_Load("Bullet.png");
 	astroid = IMG_Load("Astroid.png");
@@ -249,15 +257,11 @@ int main(int argc, char **arg) {
 		}
 	}
 
-	Uint32 current_time = SDL_GetTicks() / 25;
 	while (is_running) {
-		lastUpdateTime = current_time;
-		current_time = SDL_GetTicks() / 25;
-		//SDL_FreeSurface(screen);
 		update(&players[thread_recv_info.id].rect, screen, &is_running,
 				&thread_recv_info, bullets, &cooldown, bullet_pic);
-		collision(players[thread_recv_info.id].rect, root);
-		bullet_collision(bullets, root, 4);
+		collision(players[thread_recv_info.id].rect, root, NULL);
+		bullet_collision(bullets, root, 4, &thread_recv_info);
 		draw(screen, root, bullets, thread_recv_info, astroid);
 		close_window(&is_running);
 		SDL_framerateDelay(&manager);

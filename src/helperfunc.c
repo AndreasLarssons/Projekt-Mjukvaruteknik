@@ -45,7 +45,7 @@ int search_id(node * root, int id) {
 		}
 		current = current->next;
 		pos++;
-		printf("%d\n", pos);
+		//printf("%d\n", pos);
 	}
 	return -1;
 
@@ -53,14 +53,18 @@ int search_id(node * root, int id) {
 node *search_node(node * root, int id) {
 	node * current = root;
 	int i;
-	for (i = 0; i < 10; i++){
-		if (current->astroid.id == id) {
-			return current;
+	for (i = 0; i < 10; i++) {
+		if (current != NULL) {
+			if (current->astroid.id == id) {
+				return current;
 
+			}
+			current = current->next;
 		}
-		current = current->next;
+
 	}
 	return NULL;
+	//printf("HÄR!\n");
 
 }
 
@@ -69,22 +73,30 @@ int remove_id(node ** root, int id) {
 	node * temp_node = NULL;
 	int pos = search_id(*root, id);
 	int i;
-	for (i = 0; i < pos - 1; i++) {
-		if (current->next == NULL) {
-			return -1;
+	//printf("%d\n", id);
+	if (pos > 0) {
+		for (i = 0; i < pos - 1; i++) {
+			if (current == NULL) {
+				return -1;
+			}
+			current = current->next;
 		}
-		current = current->next;
+		temp_node = current->next;
+		current->next = temp_node->next;
+		free(temp_node);
+	} else if (pos == 0){
+		if (*root != NULL) {
+			*root = (*root)->next;
+			//free(current);
+		}
 	}
-	temp_node = current->next;
-	current->next = temp_node->next;
-	free(temp_node);
 	return 0;
 }
 
-void fill_astroid_rect(node *root, int w, int h){
+void fill_astroid_rect(node *root, int w, int h) {
 	node * iterate = root;
 	int i;
-	for (i = 0; i < 10; i++){
+	for (i = 0; i < 10; i++) {
 		iterate->astroid.rect = create_rect(0, 0, w, h);
 		iterate = iterate->next;
 	}
