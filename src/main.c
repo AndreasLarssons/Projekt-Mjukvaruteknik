@@ -44,7 +44,7 @@ void draw(SDL_Surface *screen, node * root, bullet bullets[],
 		}
 	}
 	node * tmp = root;
-	for (i = 0; i < 10; i++) {
+	for (i = 0; i < 11; i++) {
 		//draw_rect(screen, &tmp->astroid.rect);
 		if (tmp != NULL) {
 			if (i != 0) {
@@ -193,7 +193,7 @@ int main(int argc, char **arg) {
 	bullet bullets[5];
 	node *root;
 	create_linked_list(root);
-	fill_list(&root, 0, 0, 10);
+	fill_list(&root, 0, 0, 11);
 	fill_astroid_rect(root, 10, 10);
 	int cooldown = 0;
 
@@ -260,7 +260,7 @@ int main(int argc, char **arg) {
 	while (is_running) {
 		update(&players[thread_recv_info.id].rect, screen, &is_running,
 				&thread_recv_info, bullets, &cooldown, bullet_pic);
-		collision(players[thread_recv_info.id].rect, root, NULL);
+		collision(players[thread_recv_info.id].rect, root, NULL, NULL);
 		bullet_collision(bullets, root, 4, &thread_recv_info);
 		draw(screen, root, bullets, thread_recv_info, astroid);
 		close_window(&is_running);

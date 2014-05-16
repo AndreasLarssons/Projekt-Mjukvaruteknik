@@ -53,7 +53,7 @@ int search_id(node * root, int id) {
 node *search_node(node * root, int id) {
 	node * current = root;
 	int i;
-	for (i = 0; i < 10; i++) {
+	for (i = 0; i < 11; i++) {
 		if (current != NULL) {
 			if (current->astroid.id == id) {
 				return current;
