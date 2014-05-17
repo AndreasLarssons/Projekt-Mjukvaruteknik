@@ -25,6 +25,7 @@ typedef int bool;
 struct player{
 	SDL_Rect rect;
 	double angle;
+	int score;
 
 } typedef player;
 struct bullet{

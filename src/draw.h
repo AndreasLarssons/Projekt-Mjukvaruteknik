@@ -13,6 +13,7 @@
 #include <SDL/SDL_image.h>
 #include "main.h"
 #include <SDL/SDL_rotozoom.h>
+#include <SDL/SDL_ttf.h>
 
 extern void draw_screen();
 extern SDL_Rect draw_rect();
@@ -20,6 +21,7 @@ extern SDL_Rect create_rect();
 //extern SDL_Surface * rotate();
 extern void rotate();
 extern void update_rect();
+extern void draw_score();
 void apply_surface();
 extern player players[4];
 

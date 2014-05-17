@@ -36,12 +36,14 @@ void collision(SDL_Rect player, node * root, thread_data *thread_info, bool *ali
 			if (i != 0) {
 				if (hit_test(player, tmp->astroid.rect) != -1) {
 					//printf("Collision + %d\n ", i);
-					if (thread_info != NULL && alive != NULL) {
+					if (thread_info != NULL) {
 						printf("%d\n", tmp->astroid.id);
 						trans_astroid_destroy(tmp, thread_info);
-						printf("HÄR!\n");
 						remove_id(&root, tmp->astroid.id);
+						printf("HÄR!\n");
 						*alive = FALSE;
+						players[thread_info->id].score += 1;
+						return;
 					}
 				}
 				tmp = tmp->next;

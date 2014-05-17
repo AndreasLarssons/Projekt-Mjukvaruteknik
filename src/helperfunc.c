@@ -18,6 +18,9 @@ void fill_list(node **root, float x, float y, int size) {
 	int i;
 	for (i = 0; i < size; i++) {
 		add_item_beginning(root, x, y, i);
+		if(i == 0){
+			(*root)->next = NULL;
+		}
 	}
 }
 
@@ -77,6 +80,7 @@ int remove_id(node ** root, int id) {
 	if (pos > 0) {
 		for (i = 0; i < pos - 1; i++) {
 			if (current == NULL) {
+				printf("ERROR IN LINKED ARRAY!\n");
 				return -1;
 			}
 			current = current->next;

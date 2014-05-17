@@ -1,5 +1,6 @@
 #include "draw.h"
 #include "main.h"
+#include "network.h"
 void draw_screen(SDL_Surface *screen) {
 
 	Uint32 color = SDL_MapRGB(screen->format, 0, 125, 255);
@@ -41,6 +42,25 @@ void apply_surface(int x, int y, SDL_Surface *ship, SDL_Surface *screen) {
 	temp.x = x;
 	temp.y = y;
 	SDL_BlitSurface(ship, NULL, screen, &temp);
+}
+
+void draw_score(SDL_Surface *screen, TTF_Font *font, thread_data *thread_info) {
+	if (players[thread_info->id].score != 0) {
+		SDL_Rect tmp = players[thread_info->id].rect;
+		tmp.x += 20;
+		tmp.y += 30;
+		char text[10];
+		sprintf(text, "%d%c", players[thread_info->id].score, 'p');
+//	TTF_SetFontStyle(font, TTF_STYLE_NORMAL);
+//	TTF_SetFontKerning(font, 1);
+		TTF_SetFontHinting(font, TTF_HINTING_NORMAL);
+		TTF_SetFontOutline(font, 1);
+		SDL_Color color = { 0, 0, 0 };
+		SDL_Surface *text_surface;
+		text_surface = TTF_RenderText_Solid(font, text, color);
+		SDL_BlitSurface(text_surface, NULL, screen, &tmp);
+		SDL_FreeSurface(text_surface);
+	}
 }
 
 //void apply_surface(SDL_Surface *ship, SDL_Surface *screen, SDL_Rect *player) {

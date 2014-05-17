@@ -17,9 +17,10 @@
 #include "main.h"
 #include "collision.h"
 #include <SDL/SDL_framerate.h>
+#include <SDL/SDL_ttf.h>
 
 void draw(SDL_Surface *screen, node * root, bullet bullets[],
-		thread_data thread_recv_info, SDL_Surface *astroid) {
+		thread_data thread_recv_info, SDL_Surface *astroid, TTF_Font *font) {
 	draw_screen(screen);
 	int i, j;
 //	for(i = 0; i < 4; i++){
@@ -43,19 +44,21 @@ void draw(SDL_Surface *screen, node * root, bullet bullets[],
 			players[i].angle = 360 - angle;
 		}
 	}
+	draw_score(screen, font, &thread_recv_info);
+
 	node * tmp = root;
 	for (i = 0; i < 11; i++) {
 		//draw_rect(screen, &tmp->astroid.rect);
 		if (tmp != NULL) {
 			if (i != 0) {
 				SDL_BlitSurface(astroid, NULL, screen, &tmp->astroid.rect);
-				tmp = tmp->next;
-			}else{
-				tmp = tmp->next;
+				printf("TROLL!\n");
 			}
+			tmp = tmp->next;
 		}
 		//tmp = tmp->next;
 	}
+
 	for (i = 0; i < 4; i++) {
 		if (bullets[i].alive == TRUE) {
 			if (bullets[i].rect.x > WIDTH - 1 || bullets[i].rect.x < 1
@@ -177,7 +180,6 @@ void move_player(SDL_Rect *player, SDL_Surface *screen,
 			*cooldown = 0;
 		}
 	}
-
 	*cooldown += 1;
 }
 
@@ -187,6 +189,7 @@ int main(int argc, char **arg) {
 	bool is_running = TRUE;
 	screen = NULL;
 	angle = 0;
+	int i, j;
 
 	int x = 1366 / 2 - 50;
 	int y = 768 / 2 - 50;
@@ -212,6 +215,8 @@ int main(int argc, char **arg) {
 		SDL_Quit();
 		return 1;
 	}
+	TTF_Init();
+	TTF_Font *font = TTF_OpenFont("SourceSansPro-Black.otf", 18);
 
 	FPSmanager manager = { 0 };
 	SDL_initFramerate(&manager);
@@ -226,10 +231,11 @@ int main(int argc, char **arg) {
 	//thread_recv_info.other_player = create_rect(x, y+100, 100, 100);
 	SDL_Thread *net_thread_recv = NULL;
 	SDL_Thread *net_thread_trans = NULL;
-	int i, j;
+
 	for (i = 0; i < 4; i++) {
 		players[i].rect = create_rect(-50, -50, 40, 40);
 		players[i].angle = 0;
+		players[i].score = 0;
 	}
 
 	net_thread_recv = SDL_CreateThread(network_recv, &thread_recv_info);
@@ -257,12 +263,13 @@ int main(int argc, char **arg) {
 		}
 	}
 
+	//remove_id(&root, 7);
 	while (is_running) {
 		update(&players[thread_recv_info.id].rect, screen, &is_running,
 				&thread_recv_info, bullets, &cooldown, bullet_pic);
 		collision(players[thread_recv_info.id].rect, root, NULL, NULL);
 		bullet_collision(bullets, root, 4, &thread_recv_info);
-		draw(screen, root, bullets, thread_recv_info, astroid);
+		draw(screen, root, bullets, thread_recv_info, astroid, font);
 		close_window(&is_running);
 		SDL_framerateDelay(&manager);
 		SDL_Flip(screen);
