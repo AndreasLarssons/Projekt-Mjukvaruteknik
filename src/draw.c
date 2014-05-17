@@ -44,15 +44,13 @@ void apply_surface(int x, int y, SDL_Surface *ship, SDL_Surface *screen) {
 	SDL_BlitSurface(ship, NULL, screen, &temp);
 }
 
-void draw_score(SDL_Surface *screen, TTF_Font *font, thread_data *thread_info) {
-	if (players[thread_info->id].score != 0) {
-		SDL_Rect tmp = players[thread_info->id].rect;
+void draw_score(SDL_Surface *screen, TTF_Font *font, int *id) {
+	if (players[*id].score != 0) {
+		SDL_Rect tmp = players[*id].rect;
 		tmp.x += 20;
 		tmp.y += 30;
 		char text[10];
-		sprintf(text, "%d%c", players[thread_info->id].score, 'p');
-//	TTF_SetFontStyle(font, TTF_STYLE_NORMAL);
-//	TTF_SetFontKerning(font, 1);
+		sprintf(text, "%d%c", players[*id].score, 'p');
 		TTF_SetFontHinting(font, TTF_HINTING_NORMAL);
 		TTF_SetFontOutline(font, 1);
 		SDL_Color color = { 0, 0, 0 };

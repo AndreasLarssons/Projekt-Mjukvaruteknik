@@ -43,8 +43,9 @@ void draw(SDL_Surface *screen, node * root, bullet bullets[],
 			players[i].angle = angle * -1;
 			players[i].angle = 360 - angle;
 		}
+		draw_score(screen, font, &i);
 	}
-	draw_score(screen, font, &thread_recv_info);
+
 
 	node * tmp = root;
 	for (i = 0; i < 11; i++) {

@@ -28,7 +28,7 @@ int hit_test(SDL_Rect source, SDL_Rect target) {
 	return -1;
 }
 
-void collision(SDL_Rect player, node * root, thread_data *thread_info, bool *alive) {
+void collision(SDL_Rect player, node * root, thread_data *thread_info, bool *alive, int *slot) {
 	int i = 0;
 	node * tmp = root;
 	for (i = 0; i < 11; i++) {
@@ -38,7 +38,7 @@ void collision(SDL_Rect player, node * root, thread_data *thread_info, bool *ali
 					//printf("Collision + %d\n ", i);
 					if (thread_info != NULL) {
 						printf("%d\n", tmp->astroid.id);
-						trans_astroid_destroy(tmp, thread_info);
+						trans_astroid_destroy(tmp, thread_info, slot);
 						remove_id(&root, tmp->astroid.id);
 						printf("HÄR!\n");
 						*alive = FALSE;
@@ -59,7 +59,7 @@ void bullet_collision(bullet bullets[], node * root, int size,
 	int i;
 	for (i = 0; i < size; i++) {
 		if (bullets[i].alive == TRUE) {
-			collision(bullets[i].rect, root, thread_info, &bullets[i].alive);
+			collision(bullets[i].rect, root, thread_info, &bullets[i].alive, &i);
 		}
 
 	}
