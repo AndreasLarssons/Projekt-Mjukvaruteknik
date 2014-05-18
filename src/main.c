@@ -22,15 +22,11 @@
 void draw(SDL_Surface *screen, node * root, bullet bullets[],
 		thread_data thread_recv_info, SDL_Surface *astroid, TTF_Font *font) {
 	draw_screen(screen);
+
 	int i, j;
-//	for(i = 0; i < 4; i++){
-//		draw_rect(screen, &players[i]);
-//	}
 	for (i = 0; i < 4; i++) {
 		SDL_Surface *rotated = rotozoomSurface(ship, players[i].angle, 1,
 				SMOOTHING_ON);
-//		players[0].x -= (rotated->w / 2) - (ship->w / 2);
-//		players[0].y -= (rotated->h / 2) - (ship->h / 2);
 		SDL_Rect rect = { 200, 200, 0, 0 };
 		rect = players[i].rect;
 		rect.x -= (rotated->w / 2) - (ship->w / 2);
@@ -49,17 +45,13 @@ void draw(SDL_Surface *screen, node * root, bullet bullets[],
 	update_asteroids(root);
 	node * tmp = root;
 	for (i = 0; i < 11; i++) {
-		//draw_rect(screen, &tmp->astroid.rect);
 		if (tmp != NULL) {
 			if (i != 0) {
 				SDL_BlitSurface(astroid, NULL, screen, &tmp->astroid.rect);
-				printf("TROLL!\n");
 			}
 			tmp = tmp->next;
 		}
-		//tmp = tmp->next;
 	}
-	printf("NU!\n");
 	for (i = 0; i < 4; i++) {
 		if (bullets[i].alive == TRUE) {
 			if (bullets[i].rect.x > WIDTH - 1 || bullets[i].rect.x < 1
@@ -116,13 +108,8 @@ void move_player(SDL_Rect *player, SDL_Surface *screen,
 		thread_data thread_recv_info, bullet bullets[], int *cooldown,
 		SDL_Surface *bullet_pic) {
 	Uint8 *keystates = SDL_GetKeyState(NULL);
-	//printf("%d\n" , thread_recv_info.id);
+
 	if (keystates[SDLK_UP]) {
-		//player->y -= 3;
-		//cord_trans(player->x, player->y, thread_recv_info);
-		//
-		//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
-		//printf("%d \n", thread_recv_info.id);
 		players[thread_recv_info.id].rect.x -= sin(
 				players[thread_recv_info.id].angle * PI / 180) * 8;
 		players[thread_recv_info.id].rect.y -= cos(
@@ -130,45 +117,21 @@ void move_player(SDL_Rect *player, SDL_Surface *screen,
 
 	}
 	if (keystates[SDLK_DOWN]) {
-		//player->y += 3;
-		//cord_trans(player->x, player->y, thread_recv_info);
-		//players[thread_recv_info->id].y += VELOCITY * lastupdatetime;
-		//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
-
 		players[thread_recv_info.id].rect.x += sin(
 				players[thread_recv_info.id].angle * PI / 180) * 8;
 		players[thread_recv_info.id].rect.y += cos(
 				players[thread_recv_info.id].angle * PI / 180) * 8;
-
 	}
 	if (keystates[SDLK_RIGHT]) {
-		//player->x += 3;
-		//cord_trans(player->x, player->y, thread_recv_info);
-		//players[thread_recv_info->id].x += VELOCITY * lastupdatetime;
-		//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
-
 		players[thread_recv_info.id].angle -= 5;
-
 	}
 	if (keystates[SDLK_LEFT]) {
-		//player->x -= 3;
-		//cord_trans(player->x, player->y, thread_recv_info);
-		//players[thread_recv_info->id].x -= VELOCITY * lastupdatetime;
-		//cord_trans(players[thread_recv_info->id].x, players[thread_recv_info->id].y, thread_recv_info);
-
 		players[thread_recv_info.id].angle += 5;
 	}
-//		fire_bullet(bullets[check_bullet_slot(bullets, 5)], players[thread_recv_info.id].rect.x,
-//				players[thread_recv_info.id].rect.y,keystates );
-
 	if (keystates[SDLK_SPACE]) {
 		int slot = check_bullet_slot(bullets, 4);
 		if (*cooldown > 40 && slot != -1) {
 
-//		bullet bullet;
-//		bullet.alive = TRUE;
-//		bullet.rect = create_rect(0, 0, 10, 10);
-//		bullet.bullet = ship;
 			bullets[slot].alive = TRUE;
 			bullets[slot].rect = create_rect(
 					players[thread_recv_info.id].rect.x + 10,
@@ -199,7 +162,6 @@ int main(int argc, char **arg) {
 	create_linked_list(root);
 	fill_list(&root, 0, 0, 11);
 	fill_astroid_rect(root, 10, 10);
-	set_asteroids(root);
 	int cooldown = 0;
 
 	ship = IMG_Load("Ship.png");
@@ -230,7 +192,6 @@ int main(int argc, char **arg) {
 	thread_recv_info.ready = 0;
 	thread_recv_info.root = root;
 
-	//thread_recv_info.other_player = create_rect(x, y+100, 100, 100);
 	SDL_Thread *net_thread_recv = NULL;
 	SDL_Thread *net_thread_trans = NULL;
 
