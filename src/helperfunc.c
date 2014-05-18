@@ -18,7 +18,7 @@ void fill_list(node **root, float x, float y, int size) {
 	int i;
 	for (i = 0; i < size; i++) {
 		add_item_beginning(root, x, y, i);
-		if(i == 0){
+		if (i == 0) {
 			(*root)->next = NULL;
 		}
 	}
@@ -88,7 +88,7 @@ int remove_id(node ** root, int id) {
 		temp_node = current->next;
 		current->next = temp_node->next;
 		free(temp_node);
-	} else if (pos == 0){
+	} else if (pos == 0) {
 		if (*root != NULL) {
 			*root = (*root)->next;
 			//free(current);
@@ -103,5 +103,20 @@ void fill_astroid_rect(node *root, int w, int h) {
 	for (i = 0; i < 10; i++) {
 		iterate->astroid.rect = create_rect(-50, -50, w, h);
 		iterate = iterate->next;
+	}
+}
+
+void set_asteroids(node *root) {
+	node * iterate = root;
+	int i;
+	for (i = 0; i < 11; i++) {
+		if (iterate != NULL) {
+			if (i != 0) {
+				iterate->astroid.rect.x = i * 150;
+				iterate->astroid.rect.y = rand() % 5 + 1;
+				iterate->astroid.velocity = rand() % 2 + 1;
+				iterate = iterate->next;
+			}
+		}
 	}
 }

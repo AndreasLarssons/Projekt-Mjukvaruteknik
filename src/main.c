@@ -46,7 +46,7 @@ void draw(SDL_Surface *screen, node * root, bullet bullets[],
 		draw_score(screen, font, &i);
 	}
 
-
+	update_asteroids(root);
 	node * tmp = root;
 	for (i = 0; i < 11; i++) {
 		//draw_rect(screen, &tmp->astroid.rect);
@@ -59,7 +59,7 @@ void draw(SDL_Surface *screen, node * root, bullet bullets[],
 		}
 		//tmp = tmp->next;
 	}
-
+	printf("NU!\n");
 	for (i = 0; i < 4; i++) {
 		if (bullets[i].alive == TRUE) {
 			if (bullets[i].rect.x > WIDTH - 1 || bullets[i].rect.x < 1
@@ -199,6 +199,7 @@ int main(int argc, char **arg) {
 	create_linked_list(root);
 	fill_list(&root, 0, 0, 11);
 	fill_astroid_rect(root, 10, 10);
+	set_asteroids(root);
 	int cooldown = 0;
 
 	ship = IMG_Load("Ship.png");

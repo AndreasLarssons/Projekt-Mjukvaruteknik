@@ -61,6 +61,30 @@ void draw_score(SDL_Surface *screen, TTF_Font *font, int *id) {
 	}
 }
 
+void update_asteroids(node *root) {
+	node * iterate = root;
+	int i, a;
+
+	iterate = root;
+	int x = rand() % 1366 + 1, y = rand() % 768 + 1;
+	SDL_Delay(5);
+	for (i = 0; i < 11; i++) {
+		if (iterate != NULL) {
+			if (i != 0) {
+				iterate->astroid.rect.x += iterate->astroid.velocity;
+				iterate->astroid.rect.y += iterate->astroid.velocity;
+				if (iterate->astroid.rect.y > 740) {
+					iterate->astroid.rect.y = 0;
+				} else if (iterate->astroid.rect.x > 1350) {
+					iterate->astroid.rect.x = 0;
+				}
+			}
+			iterate = iterate->next;
+		}
+	}
+	iterate = root;
+}
+
 //void apply_surface(SDL_Surface *ship, SDL_Surface *screen, SDL_Rect *player) {
 //
 //	SDL_BlitSurface(ship, NULL, screen, player);

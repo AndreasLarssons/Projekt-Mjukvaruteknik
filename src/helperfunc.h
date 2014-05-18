@@ -34,5 +34,6 @@ extern void fill_list(node **root, float x, float y, int size);
 
 extern node * search_node();
 extern void fill_astroid_rect();
+extern void set_asteroids();
 
 #endif /* HELPERFUNC_H_ */

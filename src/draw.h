@@ -22,6 +22,7 @@ extern SDL_Rect create_rect();
 extern void rotate();
 extern void update_rect();
 extern void draw_score();
+extern void update_asteroids();
 void apply_surface();
 extern player players[4];
 
