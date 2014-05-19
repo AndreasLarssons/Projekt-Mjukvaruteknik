@@ -48,8 +48,6 @@ void draw_score(SDL_Surface *screen, TTF_Font *font, int *id) {
 		tmp.y += 30;
 		char text[10];
 		sprintf(text, "%d%c", players[*id].score, 'p');
-		//TTF_SetFontHinting(font, TTF_HINTING_NORMAL);
-		//TTF_SetFontOutline(font, 1);
 		SDL_Color color = { 255, 255, 255 };
 		SDL_Surface *text_surface;
 		text_surface = TTF_RenderText_Solid(font, text, color);
@@ -64,8 +62,6 @@ void draw_life(SDL_Surface *screen, TTF_Font *font, int *id) {
 	tmp.y -= 25;
 	char text[10];
 	sprintf(text, "%d", players[*id].lives);
-	//TTF_SetFontHinting(font, TTF_HINTING_NORMAL);
-	//TTF_SetFontOutline(font, 1);
 	SDL_Color color = { 255, 255, 255 };
 	SDL_Surface *text_surface;
 	text_surface = TTF_RenderText_Solid(font, text, color);

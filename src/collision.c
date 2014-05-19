@@ -48,12 +48,13 @@ void collision(SDL_Rect *rect, node * root, thread_data *thread_info,
 							return;
 						} else if (allow_movement != NULL) {
 							*invincible_bool = TRUE;
+							players[thread_info->id].lives -= 1;
 							//rect->x = -100;
 							//rect->y = -50;
 							//printf("COLLIS\n");
 							//printf("invincible_bool: %d\n", *invincible_bool);
-							players[0].score -= 1;
-							//*allow_movement = 0;
+							//players[0].score -= 1;
+							//*allow_movement = FALSE;
 							return;
 						}
 					}

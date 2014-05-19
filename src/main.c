@@ -35,22 +35,24 @@ void draw(SDL_Surface *screen, node * root, bullet bullets[],
 	}
 
 	for (i = 0; i < 4; i++) {
-		SDL_Surface *rotated = rotozoomSurface(ship, players[i].angle, 1,
-				SMOOTHING_ON);
-		SDL_Rect rect = { 200, 200, 0, 0 };
-		rect = players[i].rect;
-		rect.x -= (rotated->w / 2) - (ship->w / 2);
-		rect.y -= (rotated->h / 2) - (ship->h / 2);
-		SDL_BlitSurface(rotated, NULL, screen, &rect);
-		SDL_FreeSurface(rotated);
-		if (players[i].angle == 360) {
-			players[i].angle = 0;
-		} else if (players[i].angle < 0) {
-			players[i].angle = angle * -1;
-			players[i].angle = 360 - angle;
+		if (players[i].lives != 0) {
+			SDL_Surface *rotated = rotozoomSurface(ship, players[i].angle, 1,
+					SMOOTHING_ON);
+			SDL_Rect rect = { 200, 200, 0, 0 };
+			rect = players[i].rect;
+			rect.x -= (rotated->w / 2) - (ship->w / 2);
+			rect.y -= (rotated->h / 2) - (ship->h / 2);
+			SDL_BlitSurface(rotated, NULL, screen, &rect);
+			SDL_FreeSurface(rotated);
+			if (players[i].angle == 360) {
+				players[i].angle = 0;
+			} else if (players[i].angle < 0) {
+				players[i].angle = angle * -1;
+				players[i].angle = 360 - angle;
+			}
+			draw_score(screen, font, &i);
+			draw_life(screen, font, &i);
 		}
-		draw_score(screen, font, &i);
-		draw_life(screen, font, &i);
 	}
 
 	update_asteroids(root);
@@ -246,24 +248,28 @@ int main(int argc, char **arg) {
 	}
 
 	while (is_running) {
-		update(&players[thread_recv_info.id].rect, screen, &is_running,
-				&thread_recv_info, bullets, &cooldown, bullet_pic,
-				allow_movement);
-		if (invincible_bool == FALSE) {
-			collision(&players[thread_recv_info.id].rect, root, NULL, NULL,
-					NULL, &allow_movement, &invincible_bool);
+		if (players[thread_recv_info.id].lives != 0) {
+			update(&players[thread_recv_info.id].rect, screen, &is_running,
+					&thread_recv_info, bullets, &cooldown, bullet_pic,
+					allow_movement);
+			if (invincible_bool == FALSE) {
+				collision(&players[thread_recv_info.id].rect, root,
+						&thread_recv_info, NULL, NULL, &allow_movement,
+						&invincible_bool);
+			}
+			// Checks if any bullets has made contact with any asteroids
+			bullet_collision(bullets, root, 4, &thread_recv_info);
+			// Checks if the player has any immortality active and if he does the timer will count down.
+			if (invincible_cooldown < 200 && invincible_bool == TRUE) {
+				invincible_cooldown += 1;
+				printf("invincible_cooldown: %d\n", invincible_cooldown);
+			} else {
+				invincible_bool = FALSE;
+				invincible_cooldown = 0;
+			}
 		}
-		bullet_collision(bullets, root, 4, &thread_recv_info);
 		draw(screen, root, bullets, thread_recv_info, astroid, font, stars);
 		close_window(&is_running);
-
-		if (invincible_cooldown < 200 && invincible_bool == TRUE) {
-			invincible_cooldown += 1;
-			printf("invincible_cooldown: %d\n", invincible_cooldown);
-		} else {
-			invincible_bool = FALSE;
-			invincible_cooldown = 0;
-		}
 
 		SDL_framerateDelay(&manager);
 		SDL_Flip(screen);
