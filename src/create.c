@@ -18,21 +18,34 @@ void fire_bullet(bullet * bullet, int player_x, int player_y, Uint8 *keystates) 
 
 }
 
-int check_bullet_slot(bullet bullets[], int size){
+SDL_Rect create_rect(int x, int y, int width, int height) {
+	SDL_Rect rect = { x, y, width, height };
+	return rect;
+}
+
+int check_bullet_slot(bullet bullets[], int size) {
 	int i;
-	for (i = 0; i < size; i++){
-		if (bullets[i].alive == FALSE){
+	for (i = 0; i < size; i++) {
+		if (bullets[i].alive == FALSE) {
 			return i;
 		}
 	}
 	return -1;
 }
 
-bullet create_bullet(SDL_Surface *surface, int player_x, int player_y){
+bullet create_bullet(SDL_Surface *surface, int player_x, int player_y) {
 	bullet bullet;
-	SDL_Rect rect = {player_x, player_y, 25,25 };
+	SDL_Rect rect = { player_x, player_y, 25, 25 };
 	bullet.alive = FALSE;
 	bullet.bullet = surface;
 	bullet.rect = rect;
 	return bullet;
+}
+void create_stars(star stars[], SDL_Surface *surface, int size) {
+	int i;
+	for (i = 0; i < size; i++) {
+		stars[i].rect = create_rect(i * 70, 0, 5, 5);
+		stars[i].velocity = rand() % 5 + 1;
+		stars[i].star_pic = surface;
+	}
 }

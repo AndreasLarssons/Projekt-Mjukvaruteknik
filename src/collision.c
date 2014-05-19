@@ -28,15 +28,16 @@ int hit_test(SDL_Rect source, SDL_Rect target) {
 	return -1;
 }
 
-void collision(SDL_Rect player, node * root, thread_data *thread_info, bool *alive, int *slot) {
+void collision(SDL_Rect *rect, node * root, thread_data *thread_info,
+		bool *alive, int *slot, int *allow_movement) {
 	int i = 0;
 	node * tmp = root;
 	for (i = 0; i < 11; i++) {
 		if (tmp != NULL) {
 			if (i != 0) {
-				if (hit_test(player, tmp->astroid.rect) != -1) {
+				if (hit_test(*rect, tmp->astroid.rect) != -1) {
 					//printf("Collision + %d\n ", i);
-					if (thread_info != NULL) {
+					if (thread_info != NULL && slot != NULL) {
 						printf("%d\n", tmp->astroid.id);
 						trans_astroid_destroy(tmp, thread_info, slot);
 						remove_id(&root, tmp->astroid.id);
@@ -44,10 +45,15 @@ void collision(SDL_Rect player, node * root, thread_data *thread_info, bool *ali
 						*alive = FALSE;
 						players[thread_info->id].score += 1;
 						return;
+					} else if(allow_movement != NULL){
+						//rect->x = -100;
+						//rect->y = -50;
+						printf("COLLIS\n");
+						//*allow_movement = 0;
 					}
 				}
 				tmp = tmp->next;
-			}else{
+			} else {
 				tmp = tmp->next;
 			}
 		}
@@ -59,7 +65,8 @@ void bullet_collision(bullet bullets[], node * root, int size,
 	int i;
 	for (i = 0; i < size; i++) {
 		if (bullets[i].alive == TRUE) {
-			collision(bullets[i].rect, root, thread_info, &bullets[i].alive, &i);
+			collision(&bullets[i].rect, root, thread_info, &bullets[i].alive,
+					&i, NULL);
 		}
 
 	}

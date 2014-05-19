@@ -19,11 +19,21 @@
 #include <SDL/SDL_framerate.h>
 #include <SDL/SDL_ttf.h>
 
-void draw(SDL_Surface *screen, node * root, bullet bullets[],
-		thread_data thread_recv_info, SDL_Surface *astroid, TTF_Font *font) {
-	draw_screen(screen);
+#define STARS 20
 
+void draw(SDL_Surface *screen, node * root, bullet bullets[],
+		thread_data thread_recv_info, SDL_Surface *astroid, TTF_Font *font, star stars[]) {
+	draw_screen(screen);
 	int i, j;
+	for (i = 0; i < STARS; i++) {
+		if (stars[i].rect.y > HEIGHT) {
+			stars[i].rect.y = 0;
+		}
+		stars[i].rect.y += stars[i].velocity;
+		SDL_BlitSurface(stars[i].star_pic, NULL, screen, &stars[i].rect);
+	}
+
+
 	for (i = 0; i < 4; i++) {
 		SDL_Surface *rotated = rotozoomSurface(ship, players[i].angle, 1,
 				SMOOTHING_ON);
@@ -90,9 +100,9 @@ void draw(SDL_Surface *screen, node * root, bullet bullets[],
 
 void update(SDL_Rect *player, SDL_Surface *screen, bool *is_running,
 		thread_data *thread_recv_info, bullet bullets[], int *cooldown,
-		SDL_Surface *bullet_pic) {
+		SDL_Surface *bullet_pic, int allow_movement) {
 	move_player(player, screen, *thread_recv_info, bullets, cooldown,
-			bullet_pic);
+			bullet_pic, allow_movement);
 }
 
 void close_window(bool *is_running) {
@@ -106,54 +116,57 @@ void close_window(bool *is_running) {
 
 void move_player(SDL_Rect *player, SDL_Surface *screen,
 		thread_data thread_recv_info, bullet bullets[], int *cooldown,
-		SDL_Surface *bullet_pic) {
-	Uint8 *keystates = SDL_GetKeyState(NULL);
+		SDL_Surface *bullet_pic, int allow_movement) {
+	if (allow_movement != 0) {
+		Uint8 *keystates = SDL_GetKeyState(NULL);
 
-	if (keystates[SDLK_UP]) {
-		players[thread_recv_info.id].rect.x -= sin(
-				players[thread_recv_info.id].angle * PI / 180) * 8;
-		players[thread_recv_info.id].rect.y -= cos(
-				players[thread_recv_info.id].angle * PI / 180) * 8;
+		if (keystates[SDLK_UP]) {
+			players[thread_recv_info.id].rect.x -= sin(
+					players[thread_recv_info.id].angle * PI / 180) * 8;
+			players[thread_recv_info.id].rect.y -= cos(
+					players[thread_recv_info.id].angle * PI / 180) * 8;
 
-	}
-	if (keystates[SDLK_DOWN]) {
-		players[thread_recv_info.id].rect.x += sin(
-				players[thread_recv_info.id].angle * PI / 180) * 8;
-		players[thread_recv_info.id].rect.y += cos(
-				players[thread_recv_info.id].angle * PI / 180) * 8;
-	}
-	if (keystates[SDLK_RIGHT]) {
-		players[thread_recv_info.id].angle -= 5;
-	}
-	if (keystates[SDLK_LEFT]) {
-		players[thread_recv_info.id].angle += 5;
-	}
-	if (keystates[SDLK_SPACE]) {
-		int slot = check_bullet_slot(bullets, 4);
-		if (*cooldown > 40 && slot != -1) {
-
-			bullets[slot].alive = TRUE;
-			bullets[slot].rect = create_rect(
-					players[thread_recv_info.id].rect.x + 10,
-					players[thread_recv_info.id].rect.y - 10, 25, 25);
-			bullets[slot].angle = (int) players[thread_recv_info.id].angle;
-			bullets[slot].bullet = bullet_pic;
-			printf("Bullets fire %d\n", slot);
-			bullet_trans(bullets[slot].rect.x, bullets[slot].rect.y,
-					bullets[slot].angle, slot, &thread_recv_info);
-			*cooldown = 0;
 		}
+		if (keystates[SDLK_DOWN]) {
+			players[thread_recv_info.id].rect.x += sin(
+					players[thread_recv_info.id].angle * PI / 180) * 8;
+			players[thread_recv_info.id].rect.y += cos(
+					players[thread_recv_info.id].angle * PI / 180) * 8;
+		}
+		if (keystates[SDLK_RIGHT]) {
+			players[thread_recv_info.id].angle -= 5;
+		}
+		if (keystates[SDLK_LEFT]) {
+			players[thread_recv_info.id].angle += 5;
+		}
+		if (keystates[SDLK_SPACE]) {
+			int slot = check_bullet_slot(bullets, 4);
+			if (*cooldown > 40 && slot != -1) {
+
+				bullets[slot].alive = TRUE;
+				bullets[slot].rect = create_rect(
+						players[thread_recv_info.id].rect.x + 10,
+						players[thread_recv_info.id].rect.y - 10, 25, 25);
+				bullets[slot].angle = (int) players[thread_recv_info.id].angle;
+				bullets[slot].bullet = bullet_pic;
+				printf("Bullets fire %d\n", slot);
+				bullet_trans(bullets[slot].rect.x, bullets[slot].rect.y,
+						bullets[slot].angle, slot, &thread_recv_info);
+				*cooldown = 0;
+			}
+		}
+		*cooldown += 1;
 	}
-	*cooldown += 1;
 }
 
 int main(int argc, char **arg) {
 	srand(time(NULL));
-	SDL_Surface *screen, *bullet_pic, *astroid;
+	SDL_Surface *screen, *bullet_pic, *astroid, *star_pic;
 	bool is_running = TRUE;
 	screen = NULL;
 	angle = 0;
 	int i, j;
+	int allow_movement = 1;
 
 	int x = 1366 / 2 - 50;
 	int y = 768 / 2 - 50;
@@ -163,10 +176,12 @@ int main(int argc, char **arg) {
 	fill_list(&root, 0, 0, 11);
 	fill_astroid_rect(root, 10, 10);
 	int cooldown = 0;
+	star stars[STARS];
 
 	ship = IMG_Load("Ship.png");
 	bullet_pic = IMG_Load("Bullet.png");
 	astroid = IMG_Load("Astroid.png");
+	star_pic = IMG_Load("Star.png");
 	if (!ship) {
 		printf("Cannot load file");
 	}
@@ -200,7 +215,7 @@ int main(int argc, char **arg) {
 		players[i].angle = 0;
 		players[i].score = 0;
 	}
-
+	create_stars(stars, star_pic,STARS);
 	net_thread_recv = SDL_CreateThread(network_recv, &thread_recv_info);
 
 	while (thread_recv_info.ready != 1)
@@ -229,10 +244,12 @@ int main(int argc, char **arg) {
 	//remove_id(&root, 7);
 	while (is_running) {
 		update(&players[thread_recv_info.id].rect, screen, &is_running,
-				&thread_recv_info, bullets, &cooldown, bullet_pic);
-		collision(players[thread_recv_info.id].rect, root, NULL, NULL);
+				&thread_recv_info, bullets, &cooldown, bullet_pic,
+				allow_movement);
+		collision(&players[thread_recv_info.id].rect, root, NULL, NULL,
+				&allow_movement);
 		bullet_collision(bullets, root, 4, &thread_recv_info);
-		draw(screen, root, bullets, thread_recv_info, astroid, font);
+		draw(screen, root, bullets, thread_recv_info, astroid, font, stars);
 		close_window(&is_running);
 		SDL_framerateDelay(&manager);
 		SDL_Flip(screen);

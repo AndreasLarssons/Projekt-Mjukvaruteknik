@@ -3,7 +3,7 @@
 #include "network.h"
 void draw_screen(SDL_Surface *screen) {
 
-	Uint32 color = SDL_MapRGB(screen->format, 0, 125, 255);
+	Uint32 color = SDL_MapRGB(screen->format, 0, 0, 0);
 	SDL_FillRect(screen, NULL, color);
 
 }
@@ -13,10 +13,7 @@ SDL_Rect draw_rect(SDL_Surface *screen, SDL_Rect *rect) {
 	SDL_FillRect(screen, rect, SDL_MapRGB(screen->format, 0, 0, 0));
 	return *rect;
 }
-SDL_Rect create_rect(int x, int y, int width, int height) {
-	SDL_Rect rect = { x, y, width, height };
-	return rect;
-}
+
 SDL_Surface *load_image(char *filename) {
 	SDL_Surface* loadedImage = NULL;
 	SDL_Surface* optimizedImage = NULL;
@@ -51,9 +48,9 @@ void draw_score(SDL_Surface *screen, TTF_Font *font, int *id) {
 		tmp.y += 30;
 		char text[10];
 		sprintf(text, "%d%c", players[*id].score, 'p');
-		TTF_SetFontHinting(font, TTF_HINTING_NORMAL);
-		TTF_SetFontOutline(font, 1);
-		SDL_Color color = { 0, 0, 0 };
+		//TTF_SetFontHinting(font, TTF_HINTING_NORMAL);
+		//TTF_SetFontOutline(font, 1);
+		SDL_Color color = { 255, 255, 255 };
 		SDL_Surface *text_surface;
 		text_surface = TTF_RenderText_Solid(font, text, color);
 		SDL_BlitSurface(text_surface, NULL, screen, &tmp);

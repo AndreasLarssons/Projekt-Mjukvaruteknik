@@ -21,6 +21,12 @@ double angle;
 
 typedef int bool;
 
+struct star{
+SDL_Surface *star_pic;
+SDL_Rect rect;
+int velocity;
+}typedef star;
+
 
 struct player{
 	SDL_Rect rect;

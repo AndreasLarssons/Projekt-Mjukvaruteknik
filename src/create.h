@@ -19,5 +19,7 @@ struct astroid {
 extern bullet create_bullet();
 extern int check_bullet_slot();
 extern void fire_bullet();
+extern SDL_Rect create_rect();
+extern void create_stars();
 
 #endif /* CREATE_H_ */
