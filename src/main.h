@@ -31,7 +31,7 @@ int velocity;
 struct player{
 	SDL_Rect rect;
 	double angle;
-	int score;
+	int score, lives;
 
 } typedef player;
 struct bullet{

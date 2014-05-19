@@ -58,6 +58,21 @@ void draw_score(SDL_Surface *screen, TTF_Font *font, int *id) {
 	}
 }
 
+void draw_life(SDL_Surface *screen, TTF_Font *font, int *id) {
+	SDL_Rect tmp = players[*id].rect;
+	tmp.x += 30;
+	tmp.y -= 25;
+	char text[10];
+	sprintf(text, "%d", players[*id].lives);
+	//TTF_SetFontHinting(font, TTF_HINTING_NORMAL);
+	//TTF_SetFontOutline(font, 1);
+	SDL_Color color = { 255, 255, 255 };
+	SDL_Surface *text_surface;
+	text_surface = TTF_RenderText_Solid(font, text, color);
+	SDL_BlitSurface(text_surface, NULL, screen, &tmp);
+	SDL_FreeSurface(text_surface);
+}
+
 void update_asteroids(node *root) {
 	node * iterate = root;
 	int i, a;

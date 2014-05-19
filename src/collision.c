@@ -29,7 +29,7 @@ int hit_test(SDL_Rect source, SDL_Rect target) {
 }
 
 void collision(SDL_Rect *rect, node * root, thread_data *thread_info,
-		bool *alive, int *slot, int *allow_movement) {
+		bool *alive, int *slot, int *allow_movement, int *invincible_bool) {
 	int i = 0;
 	node * tmp = root;
 	for (i = 0; i < 11; i++) {
@@ -47,10 +47,14 @@ void collision(SDL_Rect *rect, node * root, thread_data *thread_info,
 							players[thread_info->id].score += 1;
 							return;
 						} else if (allow_movement != NULL) {
+							*invincible_bool = TRUE;
 							//rect->x = -100;
 							//rect->y = -50;
 							//printf("COLLIS\n");
+							//printf("invincible_bool: %d\n", *invincible_bool);
+							players[0].score -= 1;
 							//*allow_movement = 0;
+							return;
 						}
 					}
 				}
@@ -68,7 +72,7 @@ void bullet_collision(bullet bullets[], node * root, int size,
 	for (i = 0; i < size; i++) {
 		if (bullets[i].alive == TRUE) {
 			collision(&bullets[i].rect, root, thread_info, &bullets[i].alive,
-					&i, NULL);
+					&i, NULL, NULL);
 		}
 
 	}

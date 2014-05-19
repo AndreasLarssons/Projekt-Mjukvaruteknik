@@ -50,6 +50,7 @@ void draw(SDL_Surface *screen, node * root, bullet bullets[],
 			players[i].angle = 360 - angle;
 		}
 		draw_score(screen, font, &i);
+		draw_life(screen, font, &i);
 	}
 
 	update_asteroids(root);
@@ -168,7 +169,7 @@ int main(int argc, char **arg) {
 	screen = NULL;
 	angle = 0;
 	int i, j;
-	int allow_movement = 1;
+	int allow_movement = 1, invincible_bool = TRUE, invincible_cooldown = 0;
 
 	int x = 1366 / 2 - 50;
 	int y = 768 / 2 - 50;
@@ -216,6 +217,7 @@ int main(int argc, char **arg) {
 		players[i].rect = create_rect(-50, -50, 40, 40);
 		players[i].angle = 0;
 		players[i].score = 0;
+		players[i].lives = 3;
 	}
 	create_stars(stars, star_pic, STARS);
 	net_thread_recv = SDL_CreateThread(network_recv, &thread_recv_info);
@@ -243,16 +245,26 @@ int main(int argc, char **arg) {
 		}
 	}
 
-	//remove_id(&root, 7);
 	while (is_running) {
 		update(&players[thread_recv_info.id].rect, screen, &is_running,
 				&thread_recv_info, bullets, &cooldown, bullet_pic,
 				allow_movement);
-		collision(&players[thread_recv_info.id].rect, root, NULL, NULL,
-				&allow_movement);
+		if (invincible_bool == FALSE) {
+			collision(&players[thread_recv_info.id].rect, root, NULL, NULL,
+					NULL, &allow_movement, &invincible_bool);
+		}
 		bullet_collision(bullets, root, 4, &thread_recv_info);
 		draw(screen, root, bullets, thread_recv_info, astroid, font, stars);
 		close_window(&is_running);
+
+		if (invincible_cooldown < 200 && invincible_bool == TRUE) {
+			invincible_cooldown += 1;
+			printf("invincible_cooldown: %d\n", invincible_cooldown);
+		} else {
+			invincible_bool = FALSE;
+			invincible_cooldown = 0;
+		}
+
 		SDL_framerateDelay(&manager);
 		SDL_Flip(screen);
 
