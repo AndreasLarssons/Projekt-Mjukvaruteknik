@@ -11,8 +11,8 @@
 int network_recv(void *data) {
 	char msg[MAX_LENGTH];
 	//SDL_Rect other_player = create_rect(0, 0, 10, 10);
-	int id = 0, x = 0, y = 0, slot = 0, score = 0;
-	int angle = 0, i = 0, velocity = 0;
+	int id = 0, x = 0, y = 0, slot = 0, score = 0, asteroid = 0;
+	int angle = 0, i = 0, j = 0, velocity = 0;
 	node * tmp = NULL;
 
 	thread_data *thread_info = (thread_data *) data;
@@ -43,9 +43,11 @@ int network_recv(void *data) {
 	players[thread_info->id].rect.y = 768 / 2 - 50;
 
 	for (i = 0; i < 11; i++) {
-		SDLNet_TCP_Recv(thread_info->tcpsock, msg, MAX_LENGTH);
-		while (sscanf(msg, "*%d|%d|%d|%d*", &id, &x, &y, &velocity) != 4) {
+		for(j = 0; j < 5; j++){
 			SDLNet_TCP_Recv(thread_info->tcpsock, msg, MAX_LENGTH);
+			if(sscanf(msg, "*%d|%d|%d|%d*", &id, &x, &y, &velocity) == 4){
+				break;
+			}
 		}
 		tmp = search_node(thread_info->root, id);
 		if (tmp != NULL) {
@@ -72,17 +74,18 @@ int network_recv(void *data) {
 					players[id].score = score;
 					//printf("\nid:%d x:%d y:%d\n", id, x, y);
 				}
-			} else if (sscanf(msg, "?%d|%d|%d|%d|%d?", &id, &slot, &x, &y,
+			} if (sscanf(msg, "?%d|%d|%d|%d|%d?", &id, &slot, &x, &y,
 					&angle) == 5) {
 				bullets_other[id][slot].rect.x = x;
 				bullets_other[id][slot].rect.y = y;
 				bullets_other[id][slot].angle = angle;
 				bullets_other[id][slot].alive = TRUE;
-				printf("%s \n", msg);
-			} else if (sscanf(msg, "*%d|%d*", &id, &slot) == 2) {
-				position = search_id(thread_info->root, id);
-				remove_id(&thread_info->root, id);
+				//printf("%s \n", msg);
+			} if (sscanf(msg, "*%d|%d|%d*", &id, &asteroid, &slot) == 3) {
+				//position = search_id(thread_info->root, id);
+				remove_id(&thread_info->root, asteroid);
 				bullets_other[id][slot].alive = FALSE;
+				printf("RECEIVED!\n");
 			}
 		}
 	}
@@ -121,6 +124,7 @@ void bullet_trans(int x, int y, int angle, int slot,
 
 void trans_astroid_destroy(node * astroid, thread_data *thread_info, int *slot) {
 	char str[20];
-	sprintf(str, "*%d|%d*", astroid->astroid.id, *slot);
+	sprintf(str, "*%d|%d|%d*", thread_info->id, astroid->astroid.id, *slot);
 	SDLNet_TCP_Send(thread_info->tcpsock, str, 20);
+	printf("SENT!\n");
 }

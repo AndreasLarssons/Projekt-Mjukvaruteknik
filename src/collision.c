@@ -35,21 +35,23 @@ void collision(SDL_Rect *rect, node * root, thread_data *thread_info,
 	for (i = 0; i < 11; i++) {
 		if (tmp != NULL) {
 			if (i != 0) {
-				if (hit_test(*rect, tmp->astroid.rect) != -1) {
-					//printf("Collision + %d\n ", i);
-					if (thread_info != NULL && slot != NULL) {
-						printf("%d\n", tmp->astroid.id);
-						trans_astroid_destroy(tmp, thread_info, slot);
-						remove_id(&root, tmp->astroid.id);
-						printf("HÄR!\n");
-						*alive = FALSE;
-						players[thread_info->id].score += 1;
-						return;
-					} else if(allow_movement != NULL){
-						//rect->x = -100;
-						//rect->y = -50;
-						printf("COLLIS\n");
-						//*allow_movement = 0;
+				if (tmp->astroid.velocity != 0) {
+					if (hit_test(*rect, tmp->astroid.rect) != -1) {
+						//printf("Collision + %d\n ", i);
+						if (thread_info != NULL && slot != NULL) {
+							printf("%d\n", tmp->astroid.id);
+							trans_astroid_destroy(tmp, thread_info, slot);
+							remove_id(&root, tmp->astroid.id);
+							printf("HÄR!\n");
+							*alive = FALSE;
+							players[thread_info->id].score += 1;
+							return;
+						} else if (allow_movement != NULL) {
+							//rect->x = -100;
+							//rect->y = -50;
+							//printf("COLLIS\n");
+							//*allow_movement = 0;
+						}
 					}
 				}
 				tmp = tmp->next;

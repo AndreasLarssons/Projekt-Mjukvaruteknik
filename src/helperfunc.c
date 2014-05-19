@@ -102,6 +102,7 @@ void fill_astroid_rect(node *root, int w, int h) {
 	int i;
 	for (i = 0; i < 10; i++) {
 		iterate->astroid.rect = create_rect(-50, -50, w, h);
+		iterate->astroid.velocity = 0;
 		iterate = iterate->next;
 	}
 }

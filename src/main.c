@@ -22,7 +22,8 @@
 #define STARS 20
 
 void draw(SDL_Surface *screen, node * root, bullet bullets[],
-		thread_data thread_recv_info, SDL_Surface *astroid, TTF_Font *font, star stars[]) {
+		thread_data thread_recv_info, SDL_Surface *astroid, TTF_Font *font,
+		star stars[]) {
 	draw_screen(screen);
 	int i, j;
 	for (i = 0; i < STARS; i++) {
@@ -32,7 +33,6 @@ void draw(SDL_Surface *screen, node * root, bullet bullets[],
 		stars[i].rect.y += stars[i].velocity;
 		SDL_BlitSurface(stars[i].star_pic, NULL, screen, &stars[i].rect);
 	}
-
 
 	for (i = 0; i < 4; i++) {
 		SDL_Surface *rotated = rotozoomSurface(ship, players[i].angle, 1,
@@ -57,7 +57,9 @@ void draw(SDL_Surface *screen, node * root, bullet bullets[],
 	for (i = 0; i < 11; i++) {
 		if (tmp != NULL) {
 			if (i != 0) {
-				SDL_BlitSurface(astroid, NULL, screen, &tmp->astroid.rect);
+				if (tmp->astroid.velocity != 0) {
+					SDL_BlitSurface(astroid, NULL, screen, &tmp->astroid.rect);
+				}
 			}
 			tmp = tmp->next;
 		}
@@ -215,7 +217,7 @@ int main(int argc, char **arg) {
 		players[i].angle = 0;
 		players[i].score = 0;
 	}
-	create_stars(stars, star_pic,STARS);
+	create_stars(stars, star_pic, STARS);
 	net_thread_recv = SDL_CreateThread(network_recv, &thread_recv_info);
 
 	while (thread_recv_info.ready != 1)
