@@ -189,18 +189,33 @@ void startMenu() {
 		}
 		switch (position) {
 		int data;
-		case MAIN_MENU:
-			SDL_FillRect(screen, NULL,
-					SDL_MapRGB(screen->format, 0x00, 0x00, 0xFF));
-			message[0] = renderedText[0];
-			TTF_SizeText(fontAsteroid48, "Pear To Pear", &messageWidth[0],
-					&messageHeight[0]);
-			TTF_SizeText(fontAsteroid28, "PLAY", &messageWidth[1],
-					&messageHeight[1]);
-			TTF_SizeText(fontAsteroid28, "CREDITS", &messageWidth[2],
-					&messageHeight[2]);
-			TTF_SizeText(fontAsteroid28, "QUIT", &messageWidth[3],
-					&messageHeight[3]);
+	case MAIN_MENU:
+		SDL_FillRect(screen, NULL,
+				SDL_MapRGB(screen->format, 0x00, 0x00, 0xFF));
+		message[0] = renderedText[0];
+		TTF_SizeText(fontAsteroid48, "Pear To Pear", &messageWidth[0],
+				&messageHeight[0]);
+		TTF_SizeText(fontAsteroid28, "PLAY", &messageWidth[1],
+				&messageHeight[1]);
+		TTF_SizeText(fontAsteroid28, "CREDITS", &messageWidth[2],
+				&messageHeight[2]);
+		TTF_SizeText(fontAsteroid28, "QUIT", &messageWidth[3],
+				&messageHeight[3]);
+		applySurface(0, 0, NULL, background, screen);
+		applySurface(WIDTH / 2 - messageWidth[0] / 2,
+		HEIGHT / 4 - messageHeight[0] / 2, NULL, message[0], screen);
+		applySurface(WIDTH / 2 - messageWidth[1] / 2,
+		HEIGHT / 2 - 3 * messageHeight[1] / 2, NULL, message[1], screen);
+		applySurface(WIDTH / 2 - messageWidth[2] / 2,
+		HEIGHT / 2 - messageHeight[2] / 2, NULL, message[2], screen);
+		applySurface(WIDTH / 2 - messageWidth[3] / 2,
+		HEIGHT / 2 + messageHeight[3] / 2, NULL, message[3], screen);
+		break;
+	case GAME:
+		data = game();
+		SDL_Flip(screen);
+		if (data == 0) {
+
 			applySurface(0, 0, NULL, background, screen);
 			applySurface(WIDTH / 2 - messageWidth[0] / 2,
 			HEIGHT / 4 - messageHeight[0] / 2, NULL, message[0], screen);
@@ -210,56 +225,50 @@ void startMenu() {
 			HEIGHT / 2 - messageHeight[2] / 2, NULL, message[2], screen);
 			applySurface(WIDTH / 2 - messageWidth[3] / 2,
 			HEIGHT / 2 + messageHeight[3] / 2, NULL, message[3], screen);
-			break;
-		case GAME:
-			data = game();
-			if (data != 1) {
-				SDL_Surface *text = TTF_RenderText_Solid(fontSpaceAge28,
-						"Connection Failed", colorWhite);
-				display_text(500, 600, fontSpaceAge28, text, screen);
-				SDL_Flip(screen);
-				SDL_Delay(1000);
-				position = MAIN_MENU;
-			} else {
-				SDL_Surface *text = TTF_RenderText_Solid(fontSpaceAge28,
-						"Why no play?", colorWhite);
-				display_text(500, 600, fontSpaceAge28, text, screen);
-				SDL_Flip(screen);
-				SDL_Delay(1000);
-				position = MAIN_MENU;
-			}
-			break;
-		case CREDITS:
-			SDL_FillRect(screen, NULL,
-					SDL_MapRGB(screen->format, 0x00, 0x00, 0xFF));
-			TTF_SizeText(fontSpaceAge48, "CREDITS", &messageWidth[0],
-					&messageHeight[0]);
-			TTF_SizeText(fontAsteroid28,
-					"GAMEPLAY, NETWORK AND GRAPHIC DESIGNER", &messageWidth[1],
-					&messageHeight[1]);
-			TTF_SizeText(fontAsteroid28, "ANDREAS LARSSON", &messageWidth[2],
-					&messageHeight[2]);
-			TTF_SizeText(fontAsteroid28, "ISAK GUSTAFSON", &messageWidth[3],
-					&messageHeight[3]);
-			TTF_SizeText(fontAsteroid28, "MENU DESIGNER", &messageWidth[4],
-					&messageHeight[4]);
-			TTF_SizeText(fontAsteroid28, "JOEL YAO HÅKANSSON", &messageWidth[5],
-					&messageHeight[5]);
-			TTF_SizeText(fontAsteroid28, "GAMEPLAY DESIGNER", &messageWidth[6],
-					&messageHeight[6]);
-			TTF_SizeText(fontAsteroid28, "GUSTAV SVEDIN", &messageWidth[7],
-					&messageHeight[7]);
-			TTF_SizeText(fontAsteroid28, "DENNIS DRAGOS", &messageWidth[8],
-					&messageHeight[8]);
-			applySurface(0, 0, NULL, background, screen);
-			for (messageCounter = 0; messageCounter < 9; messageCounter++) {
-				message[messageCounter] = renderedText[messageCounter + 7];
-				applySurface(WIDTH / 2 - messageWidth[messageCounter] / 2,
-						(1 + 2 * messageCounter)
-								* messageHeight[messageCounter],
-						NULL, message[messageCounter], screen);
-			}
-			break;
+
+			SDL_Surface *text = TTF_RenderText_Solid(fontSpaceAge28,
+					"Connection Failed", colorWhite);
+			display_text(500, 600, fontSpaceAge28, text, screen);
+			SDL_Flip(screen);
+			SDL_Delay(1000);
+		} else {
+			SDL_Surface *text = TTF_RenderText_Solid(fontSpaceAge28,
+					"Why no play?", colorWhite);
+			display_text(500, 600, fontSpaceAge28, text, screen);
+			SDL_Flip(screen);
+			SDL_Delay(1000);
+		}
+		position = MAIN_MENU;
+		break;
+	case CREDITS:
+		SDL_FillRect(screen, NULL,
+				SDL_MapRGB(screen->format, 0x00, 0x00, 0xFF));
+		TTF_SizeText(fontSpaceAge48, "CREDITS", &messageWidth[0],
+				&messageHeight[0]);
+		TTF_SizeText(fontAsteroid28, "GAMEPLAY, NETWORK AND GRAPHIC DESIGNER",
+				&messageWidth[1], &messageHeight[1]);
+		TTF_SizeText(fontAsteroid28, "ANDREAS LARSSON", &messageWidth[2],
+				&messageHeight[2]);
+		TTF_SizeText(fontAsteroid28, "ISAK GUSTAFSON", &messageWidth[3],
+				&messageHeight[3]);
+		TTF_SizeText(fontAsteroid28, "MENU DESIGNER", &messageWidth[4],
+				&messageHeight[4]);
+		TTF_SizeText(fontAsteroid28, "JOEL YAO HÅKANSSON", &messageWidth[5],
+				&messageHeight[5]);
+		TTF_SizeText(fontAsteroid28, "GAMEPLAY DESIGNER", &messageWidth[6],
+				&messageHeight[6]);
+		TTF_SizeText(fontAsteroid28, "GUSTAV SVEDIN", &messageWidth[7],
+				&messageHeight[7]);
+		TTF_SizeText(fontAsteroid28, "DENNIS DRAGOS", &messageWidth[8],
+				&messageHeight[8]);
+		applySurface(0, 0, NULL, background, screen);
+		for (messageCounter = 0; messageCounter < 9; messageCounter++) {
+			message[messageCounter] = renderedText[messageCounter + 7];
+			applySurface(WIDTH / 2 - messageWidth[messageCounter] / 2,
+					(1 + 2 * messageCounter) * messageHeight[messageCounter],
+					NULL, message[messageCounter], screen);
+		}
+		break;
 		}
 	}
 	for (messageCounter = 0; messageCounter < MAX_MESSAGES; messageCounter++) {

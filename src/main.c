@@ -308,5 +308,6 @@ int game() {
 	}
 	SDL_KillThread(net_thread_recv);
 	SDL_KillThread(net_thread_trans);
+	SDL_FreeSurface(screen);
 	return 1;
 }
