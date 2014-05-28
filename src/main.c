@@ -18,6 +18,7 @@
 #include "collision.h"
 #include <SDL/SDL_framerate.h>
 #include <SDL/SDL_ttf.h>
+#include <SDL/SDL_mixer.h>
 
 #define STARS 20
 
@@ -105,9 +106,9 @@ void draw(SDL_Surface *screen, node * root, bullet bullets[],
 
 void update(SDL_Rect *player, SDL_Surface *screen, bool *is_running,
 		thread_data *thread_recv_info, bullet bullets[], int *cooldown,
-		SDL_Surface *bullet_pic, int allow_movement) {
+		SDL_Surface *bullet_pic, Mix_Music *music_bullet) {
 	move_player(player, screen, *thread_recv_info, bullets, cooldown,
-			bullet_pic, allow_movement);
+			bullet_pic, music_bullet);
 }
 
 void close_window(bool *is_running) {
@@ -121,47 +122,45 @@ void close_window(bool *is_running) {
 
 void move_player(SDL_Rect *player, SDL_Surface *screen,
 		thread_data thread_recv_info, bullet bullets[], int *cooldown,
-		SDL_Surface *bullet_pic, int allow_movement) {
-	if (allow_movement != 0) {
-		Uint8 *keystates = SDL_GetKeyState(NULL);
+		SDL_Surface *bullet_pic, Mix_Music *music_bullet) {
+	Uint8 *keystates = SDL_GetKeyState(NULL);
 
-		if (keystates[SDLK_UP]) {
-			players[thread_recv_info.id].rect.x -= sin(
-					players[thread_recv_info.id].angle * PI / 180) * 8;
-			players[thread_recv_info.id].rect.y -= cos(
-					players[thread_recv_info.id].angle * PI / 180) * 8;
-
-		}
-		if (keystates[SDLK_DOWN]) {
-			players[thread_recv_info.id].rect.x += sin(
-					players[thread_recv_info.id].angle * PI / 180) * 8;
-			players[thread_recv_info.id].rect.y += cos(
-					players[thread_recv_info.id].angle * PI / 180) * 8;
-		}
-		if (keystates[SDLK_RIGHT]) {
-			players[thread_recv_info.id].angle -= 5;
-		}
-		if (keystates[SDLK_LEFT]) {
-			players[thread_recv_info.id].angle += 5;
-		}
-		if (keystates[SDLK_SPACE]) {
-			int slot = check_bullet_slot(bullets, 4);
-			if (*cooldown > 40 && slot != -1) {
-
-				bullets[slot].alive = TRUE;
-				bullets[slot].rect = create_rect(
-						players[thread_recv_info.id].rect.x + 10,
-						players[thread_recv_info.id].rect.y - 10, 25, 25);
-				bullets[slot].angle = (int) players[thread_recv_info.id].angle;
-				bullets[slot].bullet = bullet_pic;
-				printf("Bullets fire %d\n", slot);
-				bullet_trans(bullets[slot].rect.x, bullets[slot].rect.y,
-						bullets[slot].angle, slot, &thread_recv_info);
-				*cooldown = 0;
-			}
-		}
-		*cooldown += 1;
+	if (keystates[SDLK_UP]) {
+		players[thread_recv_info.id].rect.x -= sin(
+				players[thread_recv_info.id].angle * PI / 180) * 8;
+		players[thread_recv_info.id].rect.y -= cos(
+				players[thread_recv_info.id].angle * PI / 180) * 8;
 	}
+	if (keystates[SDLK_DOWN]) {
+		players[thread_recv_info.id].rect.x += sin(
+				players[thread_recv_info.id].angle * PI / 180) * 8;
+		players[thread_recv_info.id].rect.y += cos(
+				players[thread_recv_info.id].angle * PI / 180) * 8;
+	}
+	if (keystates[SDLK_RIGHT]) {
+		players[thread_recv_info.id].angle -= 5;
+	}
+	if (keystates[SDLK_LEFT]) {
+		players[thread_recv_info.id].angle += 5;
+	}
+	if (keystates[SDLK_SPACE]) {
+		int slot = check_bullet_slot(bullets, 4);
+		if (*cooldown > 40 && slot != -1) {
+			Mix_PlayMusic(music_bullet, 1);
+			bullets[slot].alive = TRUE;
+			bullets[slot].rect = create_rect(
+					players[thread_recv_info.id].rect.x + 10,
+					players[thread_recv_info.id].rect.y - 10, 25, 25);
+			bullets[slot].angle = (int) players[thread_recv_info.id].angle;
+			bullets[slot].bullet = bullet_pic;
+			printf("Bullets fire %d\n", slot);
+			bullet_trans(bullets[slot].rect.x, bullets[slot].rect.y,
+					bullets[slot].angle, slot, &thread_recv_info);
+			*cooldown = 0;
+		}
+	}
+	*cooldown += 1;
+
 }
 
 int main(int argc, char **arg) {
@@ -171,7 +170,7 @@ int main(int argc, char **arg) {
 	screen = NULL;
 	angle = 0;
 	int i, j;
-	int allow_movement = 1, invincible_bool = TRUE, invincible_cooldown = 0;
+	int invincible_bool = TRUE, invincible_cooldown = 0;
 
 	int x = 1366 / 2 - 50;
 	int y = 768 / 2 - 50;
@@ -200,7 +199,13 @@ int main(int argc, char **arg) {
 		return 1;
 	}
 	TTF_Init();
+	Mix_Init(MIX_INIT_MOD | MIX_INIT_FLAC | MIX_INIT_MP3 | MIX_INIT_OGG);
 	TTF_Font *font = TTF_OpenFont("SourceSansPro-Black.otf", 18);
+	Mix_Music *music_bullet, *music_ship_crash;
+	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
+
+	music_bullet = Mix_LoadMUS("BottleRocketSoundBible.com332895117.wav");
+	music_ship_crash = Mix_LoadMUS("glass.wav");
 
 	FPSmanager manager = { 0 };
 	SDL_initFramerate(&manager);
@@ -251,11 +256,11 @@ int main(int argc, char **arg) {
 		if (players[thread_recv_info.id].lives != 0) {
 			update(&players[thread_recv_info.id].rect, screen, &is_running,
 					&thread_recv_info, bullets, &cooldown, bullet_pic,
-					allow_movement);
+					music_bullet);
 			if (invincible_bool == FALSE) {
 				collision(&players[thread_recv_info.id].rect, root,
-						&thread_recv_info, NULL, NULL, &allow_movement,
-						&invincible_bool);
+						&thread_recv_info, NULL, NULL, &invincible_bool,
+						music_ship_crash);
 			}
 			// Checks if any bullets has made contact with any asteroids
 			bullet_collision(bullets, root, 4, &thread_recv_info);

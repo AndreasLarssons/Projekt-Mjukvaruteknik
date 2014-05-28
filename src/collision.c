@@ -29,7 +29,7 @@ int hit_test(SDL_Rect source, SDL_Rect target) {
 }
 
 void collision(SDL_Rect *rect, node * root, thread_data *thread_info,
-		bool *alive, int *slot, int *allow_movement, int *invincible_bool) {
+		bool *alive, int *slot, int *invincible_bool, Mix_Music *music) {
 	int i = 0;
 	node * tmp = root;
 	for (i = 0; i < 11; i++) {
@@ -37,7 +37,6 @@ void collision(SDL_Rect *rect, node * root, thread_data *thread_info,
 			if (i != 0) {
 				if (tmp->astroid.velocity != 0) {
 					if (hit_test(*rect, tmp->astroid.rect) != -1) {
-						//printf("Collision + %d\n ", i);
 						if (thread_info != NULL && slot != NULL) {
 							printf("%d\n", tmp->astroid.id);
 							trans_astroid_destroy(tmp, thread_info, slot);
@@ -46,15 +45,10 @@ void collision(SDL_Rect *rect, node * root, thread_data *thread_info,
 							*alive = FALSE;
 							players[thread_info->id].score += 1;
 							return;
-						} else if (allow_movement != NULL) {
+						} else if (invincible_bool != NULL) {
 							*invincible_bool = TRUE;
 							players[thread_info->id].lives -= 1;
-							//rect->x = -100;
-							//rect->y = -50;
-							//printf("COLLIS\n");
-							//printf("invincible_bool: %d\n", *invincible_bool);
-							//players[0].score -= 1;
-							//*allow_movement = FALSE;
+							Mix_PlayMusic(music, 1);
 							return;
 						}
 					}
