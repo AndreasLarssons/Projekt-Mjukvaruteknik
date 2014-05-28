@@ -63,7 +63,7 @@ void startMenu() {
 
 	screen = SDL_SetVideoMode(WIDTH, HEIGHT, DEPTH,
 	SDL_HWSURFACE | SDL_DOUBLEBUF);
-	SDL_WM_SetCaption("Asteroids", NULL);
+	SDL_WM_SetCaption("Pear To Pear", NULL);
 	background = loadImage("Intro.jpg");
 	renderedText[0] = TTF_RenderText_Blended(fontAsteroid48, "Pear To Pear",
 			colorWhite);
@@ -226,15 +226,11 @@ void startMenu() {
 			applySurface(WIDTH / 2 - messageWidth[3] / 2,
 			HEIGHT / 2 + messageHeight[3] / 2, NULL, message[3], screen);
 
-			SDL_Surface *text = TTF_RenderText_Solid(fontSpaceAge28,
-					"Connection Failed", colorWhite);
-			display_text(500, 600, fontSpaceAge28, text, screen);
+			draw_text(500, 600, screen, fontSpaceAge28, "Connection Failed", colorWhite);
 			SDL_Flip(screen);
 			SDL_Delay(1000);
 		} else {
-			SDL_Surface *text = TTF_RenderText_Solid(fontSpaceAge28,
-					"Why no play?", colorWhite);
-			display_text(500, 600, fontSpaceAge28, text, screen);
+			draw_text(500, 600, screen, fontSpaceAge28, "Why no play?", colorWhite);
 			SDL_Flip(screen);
 			SDL_Delay(1000);
 		}

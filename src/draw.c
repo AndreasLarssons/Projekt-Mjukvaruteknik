@@ -41,6 +41,16 @@ void apply_surface(int x, int y, SDL_Surface *ship, SDL_Surface *screen) {
 	SDL_BlitSurface(ship, NULL, screen, &temp);
 }
 
+void draw_text(int x, int y, SDL_Surface *screen, TTF_Font *font, char *string,
+		SDL_Color color) {
+	SDL_Rect offset;
+	offset.x = x;
+	offset.y = y;
+	SDL_Surface *text = TTF_RenderText_Solid(font, string, color);
+	SDL_BlitSurface(text, NULL, screen, &offset);
+	SDL_FreeSurface(text);
+}
+
 void draw_score(SDL_Surface *screen, TTF_Font *font, int *id) {
 	if (players[*id].score != 0) {
 		SDL_Rect tmp = players[*id].rect;

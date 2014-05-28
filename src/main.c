@@ -45,7 +45,7 @@ void draw(SDL_Surface *screen, node * root, bullet bullets[],
 	for (i = 0; i < 4; i++) {
 		if (players[i].lives != 0) {
 			SDL_Surface *rotated = rotozoomSurface(ship, players[i].angle, 1,
-			SMOOTHING_ON);
+					SMOOTHING_ON);
 			SDL_Rect rect = { 200, 200, 0, 0 };
 			rect = players[i].rect;
 			rect.x -= (rotated->w / 2) - (ship->w / 2);
@@ -109,13 +109,17 @@ void draw(SDL_Surface *screen, node * root, bullet bullets[],
 			}
 		}
 	}
+	if(players[thread_recv_info.id].lives <= 0){
+		SDL_Color colorWhite = { 0xFF, 0xFF, 0xFF };
+		draw_text(600, 700, screen, font, "You Lose", colorWhite);
+	}
 }
 
 void update(SDL_Rect *player, SDL_Surface *screen, bool *is_running,
 		thread_data *thread_recv_info, bullet bullets[], int *cooldown,
-		SDL_Surface *bullet_pic, int allow_movement) {
+		SDL_Surface *bullet_pic, int allow_movement, Mix_Music *music_bullet) {
 	move_player(player, screen, *thread_recv_info, bullets, cooldown,
-			bullet_pic, allow_movement);
+			bullet_pic, allow_movement, music_bullet);
 }
 
 void close_window(bool *is_running) {
@@ -124,7 +128,7 @@ void close_window(bool *is_running) {
 		if (event.type == SDL_QUIT) {
 			*is_running = FALSE;
 		}
-		if (event.key.keysym.sym == SDLK_ESCAPE){
+		if (event.key.keysym.sym == SDLK_ESCAPE) {
 			*is_running = FALSE;
 		}
 	}
@@ -132,7 +136,7 @@ void close_window(bool *is_running) {
 
 void move_player(SDL_Rect *player, SDL_Surface *screen,
 		thread_data thread_recv_info, bullet bullets[], int *cooldown,
-		SDL_Surface *bullet_pic, int allow_movement) {
+		SDL_Surface *bullet_pic, int allow_movement, Mix_Music *music_bullet) {
 	if (allow_movement != 0) {
 		Uint8 *keystates = SDL_GetKeyState(NULL);
 
@@ -158,7 +162,7 @@ void move_player(SDL_Rect *player, SDL_Surface *screen,
 		if (keystates[SDLK_SPACE]) {
 			int slot = check_bullet_slot(bullets, 4);
 			if (*cooldown > 40 && slot != -1) {
-
+				Mix_PlayMusic(music_bullet, 1);
 				bullets[slot].alive = TRUE;
 				bullets[slot].rect = create_rect(
 						players[thread_recv_info.id].rect.x + 10,
@@ -190,15 +194,10 @@ int game() {
 	screen = NULL;
 	angle = 0;
 	int i, j;
+	SDL_Color colorWhite = { 0xFF, 0xFF, 0xFF };
 
-	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
-		return 0;
-	}
 	screen = SDL_SetVideoMode(WIDTH, HEIGHT, DEPTH,
 			SDL_HWSURFACE | SDL_DOUBLEBUF);
-
-
-
 
 	int allow_movement = 1, invincible_bool = TRUE, invincible_cooldown = 0;
 
@@ -220,6 +219,12 @@ int game() {
 		printf("Cannot load file");
 	}
 	TTF_Font *font = TTF_OpenFont("SourceSansPro-Black.otf", 18);
+	Mix_Init(MIX_INIT_MOD | MIX_INIT_FLAC | MIX_INIT_MP3 | MIX_INIT_OGG);
+	Mix_Music *music_bullet, *music_ship_crash;
+	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
+
+	music_bullet = Mix_LoadMUS("Laser_Shoot.wav");
+	music_ship_crash = Mix_LoadMUS("Hit_Hurt.wav");
 
 	FPSmanager manager = { 0 };
 	SDL_initFramerate(&manager);
@@ -244,11 +249,10 @@ int game() {
 	create_stars(stars, star_pic, STARS);
 	net_thread_recv = SDL_CreateThread(network_recv, &thread_recv_info);
 	int timer = 0;
-	SDL_Color colorWhite = { 0xFF, 0xFF, 0xFF };
 	while (thread_recv_info.ready != 1) {
 		timer++;
 		SDL_Delay(10);
-		if (timer == 400) {
+		if (timer == 1000) {
 			break;
 		}
 	}
@@ -282,16 +286,16 @@ int game() {
 		if (players[thread_recv_info.id].lives != 0) {
 			update(&players[thread_recv_info.id].rect, screen, &is_running,
 					&thread_recv_info, bullets, &cooldown, bullet_pic,
-					allow_movement);
+					allow_movement, music_bullet);
 			if (invincible_bool == FALSE) {
 				collision(&players[thread_recv_info.id].rect, root,
 						&thread_recv_info, NULL, NULL, &allow_movement,
-						&invincible_bool);
+						&invincible_bool, music_ship_crash);
 			}
 			// Checks if any bullets has made contact with any asteroids
 			bullet_collision(bullets, root, 4, &thread_recv_info);
 			// Checks if the player has any immortality active and if he does the timer will count down.
-			if (invincible_cooldown < 200 && invincible_bool == TRUE) {
+			if (invincible_cooldown < 150 && invincible_bool == TRUE) {
 				invincible_cooldown += 1;
 				printf("invincible_cooldown: %d\n", invincible_cooldown);
 			} else {

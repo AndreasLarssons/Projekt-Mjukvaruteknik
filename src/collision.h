@@ -8,6 +8,7 @@
 #ifndef COLLISION_H_
 #define COLLISION_H_
 #include <SDL/SDL.h>
+#include <SDL/SDL_mixer.h>
 #include "helperfunc.h"
 extern SDL_Rect create_hitbox();
 extern int hit_test();
