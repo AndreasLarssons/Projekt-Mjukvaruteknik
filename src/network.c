@@ -14,17 +14,18 @@ int network_recv(void *data) {
 	int id = 0, x = 0, y = 0, slot = 0, score = 0, asteroid = 0, lives = 0;
 	int angle = 0, i = 0, j = 0, velocity = 0;
 	node * tmp = NULL;
-
 	thread_data *thread_info = (thread_data *) data;
+
 
 	// Connects to localhost at port 9999 (client)
 	IPaddress ip;
-
 	// Connects to Server
-	if (SDLNet_ResolveHost(&ip, "127.0.0.1", 9999) == -1) {
+	if (SDLNet_ResolveHost(&ip, ip_addr, atoi(port_num)) == -1) {
 		printf("SDLNet_ResolveHost: %s\n", SDLNet_GetError());
 		exit(1);
 	}
+
+	int cnt = 0;
 
 	thread_info->tcpsock = SDLNet_TCP_Open(&ip);
 	while (!(thread_info->tcpsock)) {
@@ -33,7 +34,6 @@ int network_recv(void *data) {
 	}
 
 	SDLNet_TCP_Recv(thread_info->tcpsock, msg, MAX_LENGTH);
-
 	while (sscanf(msg, "#|%d|#", &thread_info->id) != 1) {
 		SDLNet_TCP_Recv(thread_info->tcpsock, msg, MAX_LENGTH);
 	}
@@ -65,8 +65,8 @@ int network_recv(void *data) {
 			// An error could have occurred.
 		} else {
 			// Data has been received.
-			if (sscanf(msg, "#%d|%d|%d|%d|%d|%d#", &id, &x, &y, &angle, &score, &lives)
-					== 6) {
+			if (sscanf(msg, "#%d|%d|%d|%d|%d|%d#", &id, &x, &y, &angle, &score,
+					&lives) == 6) {
 				if (id != thread_info->id) {
 					players[id].rect.x = x;
 					players[id].rect.y = y;

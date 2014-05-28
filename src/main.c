@@ -18,8 +18,16 @@
 #include "collision.h"
 #include <SDL/SDL_framerate.h>
 #include <SDL/SDL_ttf.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include "menu.h"
+#include <SDL/SDL_mixer.h>
 
 #define STARS 20
+
+char ip_addr[20];
+char port_num[20];
 
 void draw(SDL_Surface *screen, node * root, bullet bullets[],
 		thread_data thread_recv_info, SDL_Surface *astroid, TTF_Font *font,
@@ -37,7 +45,7 @@ void draw(SDL_Surface *screen, node * root, bullet bullets[],
 	for (i = 0; i < 4; i++) {
 		if (players[i].lives != 0) {
 			SDL_Surface *rotated = rotozoomSurface(ship, players[i].angle, 1,
-					SMOOTHING_ON);
+			SMOOTHING_ON);
 			SDL_Rect rect = { 200, 200, 0, 0 };
 			rect = players[i].rect;
 			rect.x -= (rotated->w / 2) - (ship->w / 2);
@@ -116,6 +124,9 @@ void close_window(bool *is_running) {
 		if (event.type == SDL_QUIT) {
 			*is_running = FALSE;
 		}
+		if (event.key.keysym.sym == SDLK_ESCAPE){
+			*is_running = FALSE;
+		}
 	}
 }
 
@@ -165,12 +176,30 @@ void move_player(SDL_Rect *player, SDL_Surface *screen,
 }
 
 int main(int argc, char **arg) {
+	printf("Write server IP\n");
+	gets(ip_addr);
+	printf("Write your PORT\n");
+	gets(port_num);
+	startMenu();
+	return 0;
+}
+int game() {
 	srand(time(NULL));
 	SDL_Surface *screen, *bullet_pic, *astroid, *star_pic;
 	bool is_running = TRUE;
 	screen = NULL;
 	angle = 0;
 	int i, j;
+
+	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
+		return 0;
+	}
+	screen = SDL_SetVideoMode(WIDTH, HEIGHT, DEPTH,
+			SDL_HWSURFACE | SDL_DOUBLEBUF);
+
+
+
+
 	int allow_movement = 1, invincible_bool = TRUE, invincible_cooldown = 0;
 
 	int x = 1366 / 2 - 50;
@@ -190,16 +219,6 @@ int main(int argc, char **arg) {
 	if (!ship) {
 		printf("Cannot load file");
 	}
-
-	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
-		return 0;
-	}
-	if (!(screen = SDL_SetVideoMode(WIDTH, HEIGHT, DEPTH,
-			SDL_HWSURFACE | SDL_DOUBLEBUF))) {
-		SDL_Quit();
-		return 1;
-	}
-	TTF_Init();
 	TTF_Font *font = TTF_OpenFont("SourceSansPro-Black.otf", 18);
 
 	FPSmanager manager = { 0 };
@@ -211,6 +230,7 @@ int main(int argc, char **arg) {
 	thread_recv_info.y = y;
 	thread_recv_info.ready = 0;
 	thread_recv_info.root = root;
+	thread_recv_info.error = 0;
 
 	SDL_Thread *net_thread_recv = NULL;
 	SDL_Thread *net_thread_trans = NULL;
@@ -223,9 +243,20 @@ int main(int argc, char **arg) {
 	}
 	create_stars(stars, star_pic, STARS);
 	net_thread_recv = SDL_CreateThread(network_recv, &thread_recv_info);
+	int timer = 0;
+	SDL_Color colorWhite = { 0xFF, 0xFF, 0xFF };
+	while (thread_recv_info.ready != 1) {
+		timer++;
+		SDL_Delay(10);
+		if (timer == 400) {
+			break;
+		}
+	}
+	if (timer == 400) {
+		SDL_KillThread(net_thread_recv);
+		return 0;
+	}
 
-	while (thread_recv_info.ready != 1)
-		;
 	net_thread_trans = SDL_CreateThread(network_trans, &thread_recv_info);
 
 	if (net_thread_recv == NULL) {
@@ -275,6 +306,7 @@ int main(int argc, char **arg) {
 		SDL_Flip(screen);
 
 	}
-
-	return 0;
+	SDL_KillThread(net_thread_recv);
+	SDL_KillThread(net_thread_trans);
+	return 1;
 }

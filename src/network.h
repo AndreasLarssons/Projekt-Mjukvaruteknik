@@ -15,6 +15,7 @@
 typedef struct thread_data{
 	TCPsocket tcpsock;
 	int id, x, y, ready;
+	int *error;
 	node *root;
 }thread_data;
 

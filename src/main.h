@@ -18,7 +18,9 @@ double angle;
 #define DEPTH 32
 #define VELOCITY 10
 #define PI 3.14159265
-
+extern int game();
+extern char ip_addr[20];
+extern char port_num[20];
 typedef int bool;
 
 struct star{
