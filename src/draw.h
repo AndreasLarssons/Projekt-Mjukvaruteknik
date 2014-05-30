@@ -15,13 +15,20 @@
 #include <SDL/SDL_rotozoom.h>
 #include <SDL/SDL_ttf.h>
 
+//This function applies a background color to the screen.
 extern void draw_screen();
+
+//This function fills a rectangular with the color black.
 extern SDL_Rect draw_rect();
 //extern SDL_Surface * rotate();
-extern void rotate();
-extern void update_rect();
+
+//This function draws the specified player's score in the bottom right of that player's rectangular.
 extern void draw_score();
+
+//This function updates all asteroids positions.
 extern void update_asteroids();
+
+
 void apply_surface();
 extern player players[4];
 

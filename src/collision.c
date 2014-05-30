@@ -38,8 +38,8 @@ void collision(SDL_Rect *rect, node * root, thread_data *thread_info,
 			if (i != 0) {
 				if (tmp->astroid.velocity != 0) {
 					if (hit_test(*rect, tmp->astroid.rect) != -1) {
-						//printf("Collision + %d\n ", i);
 						if (thread_info != NULL && slot != NULL) {
+							// Used to check if a bullet has hit a asteroid.
 							printf("%d\n", tmp->astroid.id);
 							trans_astroid_destroy(tmp, thread_info, slot);
 							remove_id(&root, tmp->astroid.id);
@@ -48,6 +48,7 @@ void collision(SDL_Rect *rect, node * root, thread_data *thread_info,
 							players[thread_info->id].score += 1;
 							return;
 						} else if (allow_movement != NULL) {
+							// Used to check if a player has hit a asteroid.
 							*invincible_bool = TRUE;
 							players[thread_info->id].lives -= 1;
 							Mix_PlayMusic(music, 1);

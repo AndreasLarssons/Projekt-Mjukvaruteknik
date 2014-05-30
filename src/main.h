@@ -46,9 +46,18 @@ struct bullet{
 
 player players[4];
 bullet bullets_other[4][4];
+
+//This function draws all players, asteroids and bullets that is alive.
+//It also updates the position of all asteroids and bullets that is alive.
 void draw();
+
+//This function is used to update player values.
 void update();
+
+//This function checks if the user wants to close the game window.
 void close_window();
+
+//This function checks if any of the arrowkeys or the spacebar has been pressed.
 void move_player();
 
 

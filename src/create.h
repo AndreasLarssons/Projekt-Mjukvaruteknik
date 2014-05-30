@@ -17,9 +17,17 @@ struct astroid {
 }typedef astroid;
 
 extern bullet create_bullet();
+
+//This function returns an available bullet's position in the array.
 extern int check_bullet_slot();
+
+
 extern void fire_bullet();
+
+//This function returns a rectangle with specified position, width and height.
 extern SDL_Rect create_rect();
+
+//This function fill the star array with stars with a unique position and random velocity.
 extern void create_stars();
 
 #endif /* CREATE_H_ */
